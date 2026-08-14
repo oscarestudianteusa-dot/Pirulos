@@ -29,8 +29,7 @@ Fotos Carta/           Las 11 fotos de la carta física de las que salió todo.
 
 Sin instalar nada: abrir `docs/mockup/carta.html` en el navegador.
 
-Publicado: **https://oscarcz.github.io/pirulos/** *(reemplazar por la URL real
-después de activar GitHub Pages)*
+Publicado: **https://oscarestudianteusa-dot.github.io/Pirulos/**
 
 ## Reglas importantes
 
