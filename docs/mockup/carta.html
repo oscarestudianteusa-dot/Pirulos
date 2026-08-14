@@ -1,0 +1,1172 @@
+<title>Carta Pirulo's</title>
+<style>
+  /* ---------- Tokens de la página (envoltorio del prototipo) ---------- */
+  :root{
+    --pg-bg:#F2EFEA;
+    --pg-surface:#FBFAF8;
+    --pg-line:#DCD6CC;
+    --pg-text:#1B1815;
+    --pg-muted:#6B635A;
+    --pg-gold:#8A6414;
+    --pg-rev:#1F5F7A;
+    --pg-rev-soft:rgba(31,95,122,.10);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --pg-bg:#131110;
+      --pg-surface:#1C1A18;
+      --pg-line:#332F2B;
+      --pg-text:#EFE9E0;
+      --pg-muted:#9A9088;
+      --pg-gold:#D9AE55;
+      --pg-rev:#7FB6D2;
+      --pg-rev-soft:rgba(127,182,210,.12);
+    }
+  }
+  :root[data-theme="dark"]{
+    --pg-bg:#131110;
+    --pg-surface:#1C1A18;
+    --pg-line:#332F2B;
+    --pg-text:#EFE9E0;
+    --pg-muted:#9A9088;
+    --pg-gold:#D9AE55;
+    --pg-rev:#7FB6D2;
+    --pg-rev-soft:rgba(127,182,210,.12);
+  }
+
+  /* ---------- Tokens de marca: la pantalla del teléfono va siempre oscura,
+       igual que la carta impresa de Pirulo's. No cambia con el tema. ---------- */
+  .fono{
+    --bg:#0E0D0C;
+    --surface:#191715;
+    --surface-2:#221F1C;
+    --line:#312C27;
+    --gold:#D9AE55;
+    --gold-dim:#8C6F35;
+    --text:#F4EFE7;
+    --muted:#A79E93;
+    --rev:#7FB6D2;
+    --rev-soft:rgba(127,182,210,.13);
+    --ok:#6FBF87;
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--pg-bg);
+    color:var(--pg-text);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-size:16px;
+    line-height:1.55;
+  }
+  h1,h2,h3{text-wrap:balance;margin:0}
+  p{margin:0}
+
+  .marca{
+    font-family:ui-serif,Georgia,"Iowan Old Style",Palatino,"Times New Roman",serif;
+    font-weight:600;
+    letter-spacing:-.01em;
+  }
+  .eyebrow{
+    font-size:.688rem;letter-spacing:.14em;text-transform:uppercase;
+    font-weight:600;color:var(--pg-muted);
+  }
+
+  .wrap{max-width:1180px;margin:0 auto;padding:40px 20px 72px}
+
+  /* ---------- Encabezado ---------- */
+  .intro{max-width:62ch;display:flex;flex-direction:column;gap:14px;margin-bottom:34px}
+  .intro h1{font-size:clamp(1.75rem,4vw,2.5rem);line-height:1.1}
+  .intro p{color:var(--pg-muted);font-size:1rem}
+  .intro strong{color:var(--pg-text);font-weight:600}
+
+  .avisos{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .aviso{
+    display:inline-flex;align-items:center;gap:7px;
+    border:1px solid var(--pg-line);border-radius:999px;
+    padding:5px 12px;font-size:.813rem;color:var(--pg-muted);
+    background:var(--pg-surface);
+  }
+  .aviso b{color:var(--pg-text);font-weight:600}
+  .punto{width:8px;height:8px;border-radius:50%;flex:none}
+  .punto.rev{background:var(--pg-rev)}
+  .punto.ok{background:var(--pg-gold)}
+
+  /* ---------- Layout principal ---------- */
+  .escena{display:grid;grid-template-columns:1fr;gap:40px;align-items:start}
+  @media (min-width:980px){
+    .escena{grid-template-columns:minmax(0,390px) minmax(0,1fr);gap:56px}
+    .col-fono{position:sticky;top:32px}
+  }
+
+  /* ---------- Teléfono ---------- */
+  .fono{
+    width:100%;max-width:390px;margin:0 auto;
+    background:var(--bg);
+    border:10px solid #060505;
+    border-radius:42px;
+    box-shadow:0 24px 60px rgba(0,0,0,.34), 0 0 0 1px rgba(255,255,255,.05) inset;
+    overflow:hidden;
+    position:relative;
+    color:var(--text);
+    display:flex;flex-direction:column;
+    height:760px;
+  }
+  .barra-sistema{
+    flex:none;display:flex;justify-content:space-between;align-items:center;
+    padding:9px 22px 5px;font-size:.75rem;color:var(--muted);
+    font-variant-numeric:tabular-nums;
+  }
+  .pantalla{flex:1;overflow-y:auto;overflow-x:hidden;position:relative;scroll-behavior:smooth}
+  .pantalla::-webkit-scrollbar{width:0}
+
+  /* ---------- Cabecera de la carta ---------- */
+  .cabecera{
+    padding:18px 18px 14px;
+    background:linear-gradient(180deg,#1A1715 0%, var(--bg) 100%);
+    border-bottom:1px solid var(--line);
+  }
+  .logo{display:flex;flex-direction:column;align-items:center;gap:2px}
+  .logo .nombre{font-size:1.9rem;color:var(--text);line-height:1}
+  .logo .desde{
+    font-size:.563rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold-dim);
+  }
+  .estado-local{
+    margin-top:14px;display:flex;align-items:center;justify-content:center;gap:8px;
+    font-size:.75rem;color:var(--muted);
+  }
+  .estado-local .bolita{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+  .estado-local b{color:var(--text);font-weight:600}
+
+  /* ---------- Portada: cuadrados de categoría ---------- */
+  .portada{padding:18px 18px 130px}
+  .portada-titulo{
+    font-size:.688rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;margin-bottom:13px;
+  }
+  /* minmax(0,1fr) y no 1fr: un 1fr nunca baja de su ancho mínimo de contenido,
+     así que una palabra larga sin espacios estira su columna, la grilla crece
+     más que el teléfono y la segunda columna queda cortada por el marco. */
+  .cuadros{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .cuadro{
+    aspect-ratio:1/1;min-width:0;overflow:hidden;
+    display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;
+    background:var(--surface);border:2px solid var(--line);border-radius:16px;
+    padding:13px;font-family:inherit;text-align:left;cursor:pointer;color:var(--text);
+    transition:border-color .18s ease,background .18s ease,transform .12s ease;
+  }
+  .cuadro:hover{border-color:var(--gold);background:var(--surface-2)}
+  .cuadro:active{transform:scale(.98)}
+  /* Tamaño único y fijo para los ocho: ninguno se achica. Nunca se parte una
+     palabra al medio; los cortes van a mano con guion blando (ver CORTE). */
+  .cuadro .nom{
+    font-family:ui-serif,Georgia,Palatino,serif;font-weight:600;
+    font-size:1.125rem;line-height:1.15;color:var(--gold);
+    overflow-wrap:normal;word-break:normal;max-width:100%;
+    -webkit-hyphens:manual;hyphens:manual;
+  }
+  .cuadro .cant{font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums}
+
+  /* ---------- Vista de categoría ---------- */
+  .cab-categoria{
+    position:sticky;top:0;z-index:5;
+    display:flex;align-items:center;gap:12px;
+    padding:13px 16px;
+    background:rgba(14,13,12,.95);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .btn-atras{
+    flex:none;width:36px;height:36px;border-radius:10px;
+    border:1px solid var(--line);background:var(--surface);color:var(--text);
+    font-size:1.125rem;cursor:pointer;font-family:inherit;line-height:1;
+  }
+  .btn-atras:hover{border-color:var(--gold);color:var(--gold)}
+  .cab-categoria .txt{display:flex;flex-direction:column;min-width:0}
+  .cab-categoria h2{
+    font-size:1.125rem;font-family:ui-serif,Georgia,Palatino,serif;color:var(--gold);
+    line-height:1.2;
+  }
+  .cab-categoria span{font-size:.688rem;color:var(--muted)}
+
+  /* ---------- Lista de productos ---------- */
+  .seccion{padding:16px 18px 130px}
+  .lista{display:flex;flex-direction:column;gap:9px}
+  .item{
+    width:100%;text-align:left;font-family:inherit;cursor:pointer;
+    display:flex;gap:12px;align-items:flex-start;
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:13px;padding:13px 14px;color:var(--text);
+    transition:border-color .16s ease,background .16s ease,transform .12s ease;
+  }
+  .item:hover{border-color:var(--gold-dim);background:var(--surface-2)}
+  .item:active{transform:scale(.99)}
+  .item-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .item-nombre{font-size:.938rem;font-weight:600;line-height:1.3}
+  .item-desc{font-size:.75rem;color:var(--muted);line-height:1.45}
+  .item-precio{
+    flex:none;font-size:.938rem;font-weight:600;color:var(--gold);
+    font-variant-numeric:tabular-nums;padding-top:1px;
+  }
+  .falta-desc{
+    font-size:.688rem;color:var(--rev);border:1px dashed var(--rev);
+    border-radius:5px;padding:1px 6px;display:inline-block;
+    background:var(--rev-soft);align-self:flex-start;
+  }
+  .en-pedido{
+    font-size:.688rem;color:var(--gold);background:rgba(217,174,85,.14);
+    border-radius:5px;padding:1px 7px;align-self:flex-start;font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ---------- Barra del pedido ---------- */
+  .barra-carrito{
+    position:absolute;left:12px;right:12px;bottom:12px;z-index:20;
+    display:flex;align-items:center;gap:12px;
+    background:var(--gold);color:#1A1409;
+    border:none;border-radius:15px;padding:12px 16px;
+    font-family:inherit;font-size:.938rem;font-weight:600;cursor:pointer;
+    box-shadow:0 10px 26px rgba(0,0,0,.5);
+    text-align:left;
+  }
+  .barra-carrito[hidden]{display:none}
+  .barra-carrito .cuenta{
+    flex:none;background:#1A1409;color:var(--gold);border-radius:9px;
+    min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+    font-size:1rem;font-variant-numeric:tabular-nums;
+  }
+  .barra-carrito .txt{display:flex;flex-direction:column;line-height:1.25}
+  .barra-carrito .txt small{font-size:.688rem;font-weight:500;opacity:.72}
+  .barra-carrito .total{margin-left:auto;font-variant-numeric:tabular-nums;font-size:1rem}
+
+  /* ---------- Hoja del producto ---------- */
+  .velo{
+    position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.62);
+    opacity:0;pointer-events:none;transition:opacity .22s ease;
+  }
+  .velo.abierto{opacity:1;pointer-events:auto}
+  .hoja{
+    position:absolute;left:0;right:0;bottom:0;z-index:31;
+    background:var(--surface);border-top:1px solid var(--line);
+    border-radius:22px 22px 0 0;
+    padding:8px 18px 18px;
+    max-height:88%;overflow-y:auto;
+    transform:translateY(102%);
+    transition:transform .28s cubic-bezier(.25,.8,.3,1);
+  }
+  .hoja.abierta{transform:translateY(0)}
+  .tirador{width:38px;height:4px;border-radius:99px;background:var(--line);margin:0 auto 14px}
+  .hoja h3{font-size:1.25rem;line-height:1.2;margin-bottom:4px}
+  .hoja .precio-base{color:var(--gold);font-weight:600;font-variant-numeric:tabular-nums}
+  .hoja .desc{font-size:.813rem;color:var(--muted);margin-top:6px}
+
+  .grupo{margin-top:18px}
+  .grupo-cab{display:flex;align-items:center;gap:8px;margin-bottom:9px;flex-wrap:wrap}
+  .grupo-cab h4{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0}
+  .obligatorio{font-size:.625rem;color:var(--gold);border:1px solid var(--gold-dim);border-radius:4px;padding:1px 5px}
+  .marca-rev{
+    font-size:.625rem;color:var(--rev);border:1px dashed var(--rev);
+    border-radius:4px;padding:1px 5px;background:var(--rev-soft);
+  }
+  .opciones{display:flex;flex-wrap:wrap;gap:7px}
+  .opcion{
+    border:1px solid var(--line);background:var(--surface-2);color:var(--muted);
+    border-radius:9px;padding:8px 13px;font-size:.813rem;font-family:inherit;cursor:pointer;
+    transition:border-color .16s ease,color .16s ease;
+  }
+  .opcion:hover{color:var(--text);border-color:var(--gold-dim)}
+  .opcion[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:rgba(217,174,85,.1);font-weight:600}
+  .opciones.pendiente{
+    border:1px dashed var(--rev);border-radius:11px;padding:10px;background:var(--rev-soft);
+    flex-direction:column;align-items:flex-start;gap:6px;
+  }
+  .opciones.pendiente p{font-size:.75rem;color:var(--rev);line-height:1.45}
+
+  .campo{
+    width:100%;background:var(--surface-2);border:1px solid var(--line);
+    border-radius:10px;padding:11px 13px;color:var(--text);
+    font-family:inherit;font-size:.875rem;resize:none;
+  }
+  .campo::placeholder{color:#6E665D}
+  .campo:focus-visible{outline:2px solid var(--gold);outline-offset:1px;border-color:transparent}
+
+  .pie-hoja{display:flex;gap:11px;align-items:center;margin-top:20px}
+  .stepper{display:flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:11px;background:var(--surface-2)}
+  .stepper button{
+    width:40px;height:44px;background:none;border:none;color:var(--text);
+    font-size:1.25rem;cursor:pointer;font-family:inherit;border-radius:11px;
+  }
+  .stepper button:hover{color:var(--gold)}
+  .stepper span{min-width:26px;text-align:center;font-weight:600;font-variant-numeric:tabular-nums}
+  .stepper.chico button{width:32px;height:32px;font-size:1rem}
+  .stepper.chico span{min-width:20px;font-size:.813rem}
+  .btn-principal{
+    flex:1;background:var(--gold);color:#1A1409;border:none;border-radius:11px;
+    padding:13px;font-family:inherit;font-size:.938rem;font-weight:600;cursor:pointer;
+    font-variant-numeric:tabular-nums;
+  }
+  .btn-principal:hover{background:#E7BC66}
+  .btn-principal:disabled{background:var(--surface-2);color:#6E665D;cursor:not-allowed}
+
+  /* ---------- Detalle del pedido ---------- */
+  .vista{padding:18px 18px 30px}
+  .volver{
+    background:none;border:none;color:var(--muted);font-family:inherit;font-size:.875rem;
+    cursor:pointer;padding:0;margin-bottom:16px;display:inline-flex;gap:7px;align-items:center;
+  }
+  .volver:hover{color:var(--gold)}
+  .vista h2{font-size:1.375rem;margin-bottom:4px;font-family:ui-serif,Georgia,Palatino,serif}
+  .vista .bajada{font-size:.75rem;color:var(--muted);margin-bottom:16px}
+
+  .linea-carrito{
+    display:flex;gap:11px;align-items:flex-start;
+    padding:14px 0;border-bottom:1px solid var(--line);
+  }
+  .linea-carrito .cuerpo{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+  .linea-carrito .nom{font-size:.938rem;font-weight:600;line-height:1.3}
+  .linea-carrito .sub{font-size:.75rem;color:var(--muted);line-height:1.4}
+  .linea-carrito .fila-baja{display:flex;align-items:center;gap:10px;margin-top:3px}
+  .linea-carrito .mon{
+    flex:none;font-size:.938rem;font-weight:600;font-variant-numeric:tabular-nums;
+    color:var(--gold);
+  }
+  .quitar{
+    background:none;border:none;color:#96706F;font-family:inherit;font-size:.75rem;
+    cursor:pointer;padding:4px 2px;
+  }
+  .quitar:hover{color:#D08E8E}
+
+  .totales{display:flex;justify-content:space-between;align-items:baseline;padding:18px 0 4px;font-size:1.125rem;font-weight:600}
+  .totales .mon{color:var(--gold);font-variant-numeric:tabular-nums}
+
+  .vacio{text-align:center;color:var(--muted);font-size:.875rem;padding:50px 20px}
+
+  .exito{text-align:center;padding:34px 6px 20px}
+  .exito .marca-ok{
+    width:56px;height:56px;border-radius:50%;background:rgba(111,191,135,.14);
+    border:1px solid var(--ok);color:var(--ok);
+    display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 16px;
+  }
+  .exito h2{font-size:1.25rem;margin-bottom:8px}
+  .exito p{font-size:.875rem;color:var(--muted);max-width:30ch;margin:0 auto}
+
+  /* ---------- Ticket ---------- */
+  .ticket-caja{margin-top:24px}
+  .ticket{
+    background:#F6F4EF;color:#15130F;
+    font-family:ui-monospace,"Cascadia Mono",Consolas,"DejaVu Sans Mono",monospace;
+    font-size:.688rem;line-height:1.5;
+    padding:16px 12px;border-radius:4px;
+    white-space:pre;overflow-x:auto;
+    box-shadow:0 6px 18px rgba(0,0,0,.3);
+  }
+
+  /* ---------- Columna de notas ---------- */
+  .notas{display:flex;flex-direction:column;gap:26px}
+  .paso{
+    background:var(--pg-surface);border:1px solid var(--pg-line);
+    border-radius:14px;padding:20px 22px;
+    display:flex;flex-direction:column;gap:9px;
+  }
+  .paso-cab{display:flex;align-items:center;gap:11px}
+  .paso-num{
+    flex:none;width:26px;height:26px;border-radius:50%;
+    border:1px solid var(--pg-gold);color:var(--pg-gold);
+    display:flex;align-items:center;justify-content:center;
+    font-size:.75rem;font-weight:600;font-variant-numeric:tabular-nums;
+  }
+  .paso h3{font-size:1rem;font-weight:600}
+  .paso p{font-size:.875rem;color:var(--pg-muted)}
+  .paso p + p{margin-top:2px}
+  .paso b{color:var(--pg-text);font-weight:600}
+
+  .pendiente-nota{
+    border-left:3px solid var(--pg-rev);background:var(--pg-rev-soft);
+    padding:10px 14px;border-radius:0 8px 8px 0;
+    font-size:.813rem;color:var(--pg-text);
+  }
+  .pendiente-nota b{color:var(--pg-rev)}
+
+  .bloque{border-top:1px solid var(--pg-line);padding-top:26px;margin-top:8px}
+  .bloque h2{font-size:1.25rem;margin-bottom:14px}
+  .bloque > p{color:var(--pg-muted);font-size:.938rem;max-width:64ch}
+
+  .rejilla{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:16px}
+  .tarjeta{
+    background:var(--pg-surface);border:1px solid var(--pg-line);border-radius:12px;padding:16px 18px;
+  }
+  .tarjeta h4{font-size:.875rem;font-weight:600;margin:0 0 6px}
+  .tarjeta p{font-size:.813rem;color:var(--pg-muted)}
+  .tarjeta.rev{border-color:var(--pg-rev);background:var(--pg-rev-soft)}
+  .tarjeta.rev h4{color:var(--pg-rev)}
+
+  ul.lista-simple{margin:10px 0 0;padding-left:20px;color:var(--pg-muted);font-size:.875rem}
+  ul.lista-simple li{margin-bottom:6px}
+  ul.lista-simple b{color:var(--pg-text);font-weight:600}
+
+  :where(button,input,textarea):focus-visible{outline:2px solid var(--pg-gold);outline-offset:2px}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important;transition-duration:.001ms !important}
+    .pantalla{scroll-behavior:auto}
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="intro">
+    <span class="eyebrow">Pirulo's · Fase 1 · Prototipo visual</span>
+    <h1 class="marca">Así se vería la carta que le llega al cliente</h1>
+    <p>
+      Esto es lo que abre alguien cuando toca el link de WhatsApp o escanea el QR de la mesa.
+      Funciona de verdad: entrá a una sección, tocá un producto, armá un pedido y mirá cómo queda
+      la comanda impresa al final. Los <strong>90 productos y los 90 precios son los reales</strong>,
+      salidos de <code>data/catalogo.json</code>.
+    </p>
+    <div class="avisos">
+      <span class="aviso"><span class="punto ok"></span><b>90</b> productos · <b>8</b> secciones</span>
+      <span class="aviso"><span class="punto rev"></span>Todo lo marcado en <b>azul</b> espera respuesta de Miguel</span>
+    </div>
+  </header>
+
+  <div class="escena">
+
+    <div class="col-fono">
+      <div class="fono">
+        <div class="barra-sistema">
+          <span>21:35</span>
+          <span>Chrome · pirulos.cl</span>
+        </div>
+
+        <div class="pantalla" id="pantalla"></div>
+
+        <button class="barra-carrito" id="barraCarrito" hidden>
+          <span class="cuenta" id="carritoCuenta">0</span>
+          <span class="txt">
+            <span id="carritoTitulo">Ver mi pedido</span>
+            <small>Tocá para ver el detalle</small>
+          </span>
+          <span class="total" id="carritoTotal">$0</span>
+        </button>
+
+        <div class="velo" id="velo"></div>
+        <div class="hoja" id="hoja" role="dialog" aria-modal="true" aria-label="Detalle del producto">
+          <div class="tirador"></div>
+          <div id="hojaCuerpo"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notas">
+
+      <div class="paso">
+        <div class="paso-cab">
+          <span class="paso-num">1</span>
+          <h3>Llega desde WhatsApp o desde el QR</h3>
+        </div>
+        <p>
+          Sin login, sin registro, sin instalar nada. La cabecera muestra el nombre del local y si
+          está abierto o cerrado, para que nadie mande un pedido a las 3 de la mañana.
+        </p>
+        <div class="pendiente-nota">
+          <b>Falta:</b> el horario de atención. Hoy el indicador dice "Abierto" fijo. En cuanto
+          Miguel dé los horarios, se calcula solo.
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-cab">
+          <span class="paso-num">2</span>
+          <h3>Portada: las 8 secciones como cuadrados</h3>
+        </div>
+        <p>
+          Lo primero que ve es la carta completa de una: ocho cuadrados de dos en dos que se
+          recorren bajando con el pulgar. Nada de deslizar al lado para descubrir qué más hay.
+        </p>
+        <p>
+          Cada cuadro dice cuántos productos tiene adentro, así sabe si entra a mirar 2 o 21 cosas
+          antes de tocar. Entra a una sección, elige, y vuelve con la flecha.
+        </p>
+      </div>
+
+      <div class="paso">
+        <div class="paso-cab">
+          <span class="paso-num">3</span>
+          <h3>Arma el producto</h3>
+        </div>
+        <p>
+          Al tocar un producto sube una hoja desde abajo, sin cambiar de página: elige la carne,
+          la cantidad y escribe una nota ("sin tomate"). El precio del botón se actualiza mientras
+          elige, así nunca hay sorpresa al final.
+        </p>
+        <div class="pendiente-nota">
+          <b>Falta:</b> los modificadores de verdad. Hoy solo está la proteína del sándwich (la
+          única confirmada). Lo que la gente pide realmente —extra queso, sin mayo, palta extra— y
+          <b>cuáles cuestan más</b> se levanta con Miguel.
+        </div>
+      </div>
+
+      <div class="paso">
+        <div class="paso-cab">
+          <span class="paso-num">4</span>
+          <h3>La barra de abajo va sumando</h3>
+        </div>
+        <p>
+          Apenas agrega algo aparece la barra dorada y ya no se despega: cuántos productos lleva y
+          cuánto va gastando, esté donde esté de la carta. Los productos que ya pidió quedan
+          marcados en la lista con su cantidad.
+        </p>
+        <p>
+          Si la toca se abre el detalle completo, y ahí <b>edita sin volver atrás</b>: sube o baja
+          la cantidad de cada línea con los botones − y +, o la borra. El total se recalcula solo.
+        </p>
+        <p>
+          El nombre es obligatorio: sin nombre el botón de enviar no se activa, porque es lo que la
+          cocina grita cuando el pedido está listo.
+        </p>
+      </div>
+
+      <div class="paso">
+        <div class="paso-cab">
+          <span class="paso-num">5</span>
+          <h3>Se imprime la comanda</h3>
+        </div>
+        <p>
+          El cliente ve la confirmación; en la tablet suena la alerta y sale el ticket. Abajo del
+          "listo" dejé el <b>ticket real a 48 caracteres</b>, que es el ancho de la Xprinter de
+          80mm, armado con lo que hayas puesto en el pedido.
+        </p>
+        <p>
+          Este preview sirve para discutirlo con Miguel <b>antes</b> de gastar papel: si quiere el
+          nombre del cliente más grande o las notas separadas, se cambia acá.
+        </p>
+        <p>
+          <b>Algo que apareció al ver el ticket:</b> el primero decía "2x Italiano", y el Italiano
+          existe en Sándwich, As y Vienesas a tres precios distintos. En la carta se distinguen por
+          la sección, pero en el papel esa sección se pierde y la cocina no sabe cuál armar. Ahora
+          imprime <b>"2x Sándwich Italiano"</b>. Es exactamente el tipo de error que se ve dibujando
+          y no leyendo el JSON.
+        </p>
+      </div>
+
+      <div class="bloque">
+        <h2 class="marca">Decisiones de estilo</h2>
+        <p>
+          La carta impresa ya tiene identidad —fondo negro, dorado, el logo con "Tradición desde
+          1982"— así que la carta digital la respeta en vez de inventar una nueva. El cliente que
+          ve el papel en la mesa y el que abre el link tienen que sentir que es el mismo local.
+        </p>
+        <div class="rejilla">
+          <div class="tarjeta">
+            <h4>Negro y dorado</h4>
+            <p>Sacados de la carta física. El dorado se usa solo en tres cosas: precios, el nombre
+              de la sección y el botón de acción. Si lo pintás todo dorado, deja de guiar.</p>
+          </div>
+          <div class="tarjeta">
+            <h4>Cuadrados sin foto, por ahora</h4>
+            <p>Las fotos que tenemos son de la carta impresa, no de producto. Los cuadros funcionan
+              con puro nombre; cuando haya fotos buenas del local, entran ahí de fondo.</p>
+          </div>
+          <div class="tarjeta">
+            <h4>Botones grandes</h4>
+            <p>Todo lo tocable mide 44px o más, y los cuadros de la portada son enormes a propósito.
+              Se usa parado, con una mano, a veces con frío.</p>
+          </div>
+          <div class="tarjeta">
+            <h4>Precios en pesos enteros</h4>
+            <p>$4.800, nunca $4.800,00 ni floats. Los montos se calculan en enteros de punta a
+              punta, como dice el CLAUDE.md.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bloque">
+        <h2 class="marca">Lo que queda listo para corregir</h2>
+        <p>
+          Nada de esto frena el prototipo, pero todo cambia lo que se ve. Está marcado en azul
+          dentro del teléfono para que lo encuentres.
+        </p>
+        <div class="rejilla">
+          <div class="tarjeta rev">
+            <h4>Sabor de bebida</h4>
+            <p>La sección existe y está armada, pero vacía. Falta la lista de sabores de Miguel.
+              Todos al mismo precio, eso ya está confirmado.</p>
+          </div>
+          <div class="tarjeta rev">
+            <h4>¿El As elige carne?</h4>
+            <p>El sándwich sí (churrasco, lomito, pollo, hamburguesa). En el As la carta no dice
+              nada. Hoy el As no muestra selector. <b>Duda nueva del prototipo.</b></p>
+          </div>
+          <div class="tarjeta rev">
+            <h4>22 productos sin descripción</h4>
+            <p>Papas y bebidas se ven desnudos al lado de los sándwiches. Se nota harto en pantalla.</p>
+          </div>
+          <div class="tarjeta rev">
+            <h4>Palitos de Mozzarella</h4>
+            <p>Único de Picoteo sin cantidad confirmada. Los demás ya dicen "5 unidades" o
+              "4 unidades" debajo del nombre.</p>
+          </div>
+          <div class="tarjeta rev">
+            <h4>Horario del local</h4>
+            <p>El cartel de abierto/cerrado está hardcodeado en "Abierto".</p>
+          </div>
+        </div>
+        <ul class="lista-simple">
+          <li><b>Cómo corregir:</b> los textos y precios salen de <code>data/catalogo.json</code>.
+            Se edita ahí y la carta cambia sola; no hay ningún precio escrito dentro de esta pantalla.</li>
+          <li><b>Lo que todavía no existe:</b> este prototipo no guarda nada. No hay Supabase, no
+            hay realtime, no hay impresión. Es la pintura de la casa antes de construirla.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const CATALOGO = {
+  "_meta": {
+    "fuente": "Fotos Carta/01..11.jpg.jpeg",
+    "fecha_digitalizacion": "2026-08-14",
+    "moneda": "CLP",
+    "nota": "Precios enteros en pesos chilenos. Precios confirmados vigentes por Pipo al 14/08/2026. Quedan dudas abiertas: ver data/DUDAS.md.",
+    "regla_de_precio": "Si la carta no especifica otro precio, el precio es el mismo. Confirmado por Pipo.",
+    "sandwich_as_vienesas": "El precio NO cambia segun la proteina (churrasco / lomito / pollo / hamburguesa). La proteina se modela como modificador obligatorio sin costo en la etapa de modificadores, y DEBE salir impresa en la comanda.",
+    "catalogo_completo": "Pipo confirma que las 11 fotos cubren la carta entera: no faltan paginas ni secciones.",
+    "bebidas": "OBLIGATORIO: la carta debe tener una seccion para elegir sabor de bebida. Miguel maneja varios sabores, TODOS AL MISMO PRECIO. La lista concreta de sabores esta pendiente de Miguel (ver DUDAS.md), por eso todavia no hay modificadores en este archivo.",
+    "estructura": "8 categorias definidas por Pipo. Las 6 secciones de papas de la carta fisica (Papas Fritas, Gringa, Chorrillana, Salchipapas, Suprema, Suprema Italiana) se agruparon en 'Papas Fritas'. Las 4 secciones de picoteo (Empanaditas Medialuna, Empanaditas Triangular, Arrollados, Picoteo) se agruparon en 'Picoteo'. Los productos se llaman por su sabor a secas ('Mechada Queso'); el formato y la cantidad van en la descripcion ('Empanadita triangular - 5 unidades') y bajan a la comanda impresa."
+  },
+  "categorias": [
+    { "id": "promociones", "nombre": "Promociones", "orden": 1 },
+    { "id": "vienesas", "nombre": "Vienesas", "orden": 2 },
+    { "id": "as", "nombre": "As", "orden": 3 },
+    { "id": "sandwich", "nombre": "Sándwich", "orden": 4 },
+    { "id": "hamburguesas", "nombre": "Hamburguesas", "orden": 5 },
+    { "id": "papas-fritas", "nombre": "Papas Fritas", "orden": 6 },
+    { "id": "picoteo", "nombre": "Picoteo", "orden": 7 },
+    { "id": "bebidas", "nombre": "Bebidas", "orden": 8 }
+  ],
+  "productos": [
+    { "id": "promo-churrasco-italiano-papas", "categoria_id": "promociones", "nombre": "Churrasco Italiano o Barros Luco + Papa Individual", "descripcion": "Incluye salsa", "precio": 5500, "orden": 1 },
+    { "id": "promo-4-churrascos", "categoria_id": "promociones", "nombre": "4 Churrascos Italianos o Barros Luco", "descripcion": "4 churrascos italianos o barros luco + bebida 3 lts + papa familiar (tamaño grande)", "precio": 22000, "orden": 2 },
+    { "id": "promo-5-vienesa-italiana-bebida", "categoria_id": "promociones", "nombre": "5 Vienesa Italiana + Bebida 3 Lts", "descripcion": "", "precio": 13990, "orden": 3 },
+
+    { "id": "vienesa-hot-dog", "categoria_id": "vienesas", "nombre": "Hot Dog", "descripcion": "Solo vienesa", "precio": 1300, "orden": 1 },
+    { "id": "vienesa-tomate-mayo", "categoria_id": "vienesas", "nombre": "Tomate Mayo", "descripcion": "Tomate - mayo", "precio": 2000, "orden": 2 },
+    { "id": "vienesa-aleman", "categoria_id": "vienesas", "nombre": "Alemán", "descripcion": "Chucrut - tomate - mayo", "precio": 2200, "orden": 3 },
+    { "id": "vienesa-campesino", "categoria_id": "vienesas", "nombre": "Campesino", "descripcion": "Tomate - salsa verde - mayo", "precio": 2200, "orden": 4 },
+    { "id": "vienesa-americano", "categoria_id": "vienesas", "nombre": "Americano", "descripcion": "Americana - tomate - mayo", "precio": 2200, "orden": 5 },
+    { "id": "vienesa-completo", "categoria_id": "vienesas", "nombre": "Completo", "descripcion": "Chucrut - americana - salsa verde - tomate - mayo", "precio": 2300, "orden": 6 },
+    { "id": "vienesa-dinamico", "categoria_id": "vienesas", "nombre": "Dinámico", "descripcion": "Chucrut - americana - salsa verde - tomate - palta - mayo", "precio": 2700, "orden": 7 },
+    { "id": "vienesa-italiano", "categoria_id": "vienesas", "nombre": "Italiano", "descripcion": "Tomate - palta - mayo", "precio": 2500, "orden": 8 },
+    { "id": "vienesa-palta-mayo", "categoria_id": "vienesas", "nombre": "Palta Mayo", "descripcion": "Palta - mayo", "precio": 2300, "orden": 9 },
+    { "id": "vienesa-pirulo", "categoria_id": "vienesas", "nombre": "Pirulo", "descripcion": "Cheddar - tocino - pepinillo - barbecue", "precio": 2800, "orden": 10 },
+    { "id": "vienesa-napolitano", "categoria_id": "vienesas", "nombre": "Napolitano", "descripcion": "Tomate frito - queso - aceituna - orégano", "precio": 2800, "orden": 11 },
+    { "id": "vienesa-chacarero", "categoria_id": "vienesas", "nombre": "Chacarero", "descripcion": "Tomate - porotos verdes - ají verde - mayo", "precio": 2800, "orden": 12 },
+    { "id": "vienesa-suizo", "categoria_id": "vienesas", "nombre": "Suizo", "descripcion": "Tomate - queso - mayo", "precio": 2800, "orden": 13 },
+    { "id": "vienesa-italiano-luco", "categoria_id": "vienesas", "nombre": "Italiano Luco", "descripcion": "Tomate - palta - queso - mayo", "precio": 2800, "orden": 14 },
+    { "id": "vienesa-luco", "categoria_id": "vienesas", "nombre": "Luco", "descripcion": "Queso", "precio": 2500, "orden": 15 },
+    { "id": "vienesa-lucon", "categoria_id": "vienesas", "nombre": "Lucon", "descripcion": "Queso - tocino - mayo", "precio": 2800, "orden": 16 },
+    { "id": "vienesa-brazuca", "categoria_id": "vienesas", "nombre": "Brazuca", "descripcion": "Palta - queso - mayo", "precio": 2800, "orden": 17 },
+
+    { "id": "as-solo-carne", "categoria_id": "as", "nombre": "Solo Carne", "descripcion": "Solo carne", "precio": 3600, "orden": 1 },
+    { "id": "as-tomate-mayo", "categoria_id": "as", "nombre": "Tomate Mayo", "descripcion": "Tomate - mayo", "precio": 3700, "orden": 2 },
+    { "id": "as-aleman", "categoria_id": "as", "nombre": "Alemán", "descripcion": "Chucrut - tomate - mayo", "precio": 3700, "orden": 3 },
+    { "id": "as-campesino", "categoria_id": "as", "nombre": "Campesino", "descripcion": "Tomate - salsa verde - mayo", "precio": 3700, "orden": 4 },
+    { "id": "as-americano", "categoria_id": "as", "nombre": "Americano", "descripcion": "Americana - tomate - mayo", "precio": 3700, "orden": 5 },
+    { "id": "as-completo", "categoria_id": "as", "nombre": "Completo", "descripcion": "Chucrut - americana - salsa verde - tomate - mayo", "precio": 3800, "orden": 6 },
+    { "id": "as-dinamico", "categoria_id": "as", "nombre": "Dinámico", "descripcion": "Chucrut - americana - salsa verde - tomate - palta - mayo", "precio": 4000, "orden": 7 },
+    { "id": "as-italiano", "categoria_id": "as", "nombre": "Italiano", "descripcion": "Tomate - palta - mayo", "precio": 3800, "orden": 8 },
+    { "id": "as-palta-mayo", "categoria_id": "as", "nombre": "Palta Mayo", "descripcion": "Palta - mayo", "precio": 3700, "orden": 9 },
+    { "id": "as-pirulo", "categoria_id": "as", "nombre": "Pirulo", "descripcion": "Cheddar - tocino - pepinillo - barbecue", "precio": 4000, "orden": 10 },
+    { "id": "as-napolitano", "categoria_id": "as", "nombre": "Napolitano", "descripcion": "Tomate frito - queso - aceituna - orégano", "precio": 4000, "orden": 11 },
+    { "id": "as-chacarero", "categoria_id": "as", "nombre": "Chacarero", "descripcion": "Tomate - porotos verdes - ají verde - mayo", "precio": 4000, "orden": 12 },
+    { "id": "as-suizo", "categoria_id": "as", "nombre": "Suizo", "descripcion": "Tomate - queso - mayo", "precio": 4000, "orden": 13 },
+    { "id": "as-italiano-luco", "categoria_id": "as", "nombre": "Italiano Luco", "descripcion": "Tomate - palta - queso - mayo", "precio": 4000, "orden": 14 },
+    { "id": "as-luco", "categoria_id": "as", "nombre": "Luco", "descripcion": "Queso", "precio": 3800, "orden": 15 },
+    { "id": "as-lucon", "categoria_id": "as", "nombre": "Lucon", "descripcion": "Queso - tocino - mayo", "precio": 4000, "orden": 16 },
+    { "id": "as-brazuca", "categoria_id": "as", "nombre": "Brazuca", "descripcion": "Palta - queso - mayo", "precio": 4000, "orden": 17 },
+
+    { "id": "sandwich-solo-carne", "categoria_id": "sandwich", "nombre": "Solo Carne", "descripcion": "Solo carne", "precio": 3800, "orden": 1 },
+    { "id": "sandwich-tomate-mayo", "categoria_id": "sandwich", "nombre": "Tomate Mayo", "descripcion": "Tomate - mayo", "precio": 4200, "orden": 2 },
+    { "id": "sandwich-aleman", "categoria_id": "sandwich", "nombre": "Alemán", "descripcion": "Chucrut - tomate - mayo", "precio": 4200, "orden": 3 },
+    { "id": "sandwich-campesino", "categoria_id": "sandwich", "nombre": "Campesino", "descripcion": "Tomate - salsa verde - mayo", "precio": 4200, "orden": 4 },
+    { "id": "sandwich-americano", "categoria_id": "sandwich", "nombre": "Americano", "descripcion": "Americana - tomate - mayo", "precio": 4200, "orden": 5 },
+    { "id": "sandwich-completo", "categoria_id": "sandwich", "nombre": "Completo", "descripcion": "Chucrut - americana - salsa verde - tomate - mayo", "precio": 4500, "orden": 6 },
+    { "id": "sandwich-dinamico", "categoria_id": "sandwich", "nombre": "Dinámico", "descripcion": "Chucrut - americana - salsa verde - tomate - palta - mayo", "precio": 4800, "orden": 7 },
+    { "id": "sandwich-italiano", "categoria_id": "sandwich", "nombre": "Italiano", "descripcion": "Tomate - palta - mayo", "precio": 4600, "orden": 8 },
+    { "id": "sandwich-palta-mayo", "categoria_id": "sandwich", "nombre": "Palta Mayo", "descripcion": "Palta - mayo", "precio": 4300, "orden": 9 },
+    { "id": "sandwich-pirulo", "categoria_id": "sandwich", "nombre": "Pirulo", "descripcion": "Cheddar - tocino - pepinillo - barbecue", "precio": 4800, "orden": 10 },
+    { "id": "sandwich-napolitano", "categoria_id": "sandwich", "nombre": "Napolitano", "descripcion": "Tomate frito - queso - aceituna - orégano", "precio": 4800, "orden": 11 },
+    { "id": "sandwich-chacarero", "categoria_id": "sandwich", "nombre": "Chacarero", "descripcion": "Tomate - porotos verdes - ají verde - mayo", "precio": 4800, "orden": 12 },
+    { "id": "sandwich-suizo", "categoria_id": "sandwich", "nombre": "Suizo", "descripcion": "Tomate - queso - mayo", "precio": 4800, "orden": 13 },
+    { "id": "sandwich-italiano-luco", "categoria_id": "sandwich", "nombre": "Italiano Luco", "descripcion": "Tomate - palta - queso - mayo", "precio": 5000, "orden": 14 },
+    { "id": "sandwich-luco", "categoria_id": "sandwich", "nombre": "Luco", "descripcion": "Queso", "precio": 4600, "orden": 15 },
+    { "id": "sandwich-lucon", "categoria_id": "sandwich", "nombre": "Lucon", "descripcion": "Queso - tocino - mayo", "precio": 4900, "orden": 16 },
+    { "id": "sandwich-brazuca", "categoria_id": "sandwich", "nombre": "Brazuca", "descripcion": "Palta - queso - mayo", "precio": 4800, "orden": 17 },
+    { "id": "sandwich-chacarero-2-0", "categoria_id": "sandwich", "nombre": "Chacarero 2.0", "descripcion": "Tomate - porotos verdes - ají verde - queso - champiñón - mayo", "precio": 5700, "orden": 18 },
+    { "id": "sandwich-paltapeno", "categoria_id": "sandwich", "nombre": "Paltapeño", "descripcion": "Tomate - palta - lechuga - cebolla morada - jalapeño - mayo", "precio": 5500, "orden": 19 },
+    { "id": "sandwich-pirulastico", "categoria_id": "sandwich", "nombre": "Pirulastico", "descripcion": "Cheddar - tocino - tomate - lechuga - cebolla morada - mayo", "precio": 5700, "orden": 20 },
+    { "id": "sandwich-chemilico", "categoria_id": "sandwich", "nombre": "Chemilico", "descripcion": "Churrasco - cebolla caramelizada - huevo frito", "precio": 4900, "orden": 21 },
+
+    { "id": "hamburguesa-cheese-burguer", "categoria_id": "hamburguesas", "nombre": "Cheese Burguer", "descripcion": "2 hamburguesas 100g - cheddar - tocino - aros de cebolla - barbecue - baño de cheddar", "precio": 6500, "orden": 1 },
+    { "id": "hamburguesa-tapa-arterias", "categoria_id": "hamburguesas", "nombre": "Tapa Arterias", "descripcion": "3 hamburguesas 100g - doble tocino - cheddar - mayo - cebolla caramelizada - huevo frito", "precio": 7500, "orden": 2 },
+
+    { "id": "papas-fritas-chica", "categoria_id": "papas-fritas", "nombre": "Papas Fritas Chica", "descripcion": "", "precio": 2000, "orden": 1 },
+    { "id": "papas-fritas-mediana", "categoria_id": "papas-fritas", "nombre": "Papas Fritas Mediana", "descripcion": "", "precio": 3000, "orden": 2 },
+    { "id": "papas-fritas-grande", "categoria_id": "papas-fritas", "nombre": "Papas Fritas Grande", "descripcion": "", "precio": 5000, "orden": 3 },
+    { "id": "gringa-mediana", "categoria_id": "papas-fritas", "nombre": "Gringa Mediana", "descripcion": "", "precio": 5500, "orden": 4 },
+    { "id": "gringa-grande", "categoria_id": "papas-fritas", "nombre": "Gringa Grande", "descripcion": "", "precio": 7500, "orden": 5 },
+    { "id": "salchipapas-mediana", "categoria_id": "papas-fritas", "nombre": "Salchipapas Mediana", "descripcion": "", "precio": 3500, "orden": 6 },
+    { "id": "salchipapas-grande", "categoria_id": "papas-fritas", "nombre": "Salchipapas Grande", "descripcion": "", "precio": 6000, "orden": 7 },
+    { "id": "suprema-mediana", "categoria_id": "papas-fritas", "nombre": "Suprema Mediana", "descripcion": "", "precio": 6000, "orden": 8 },
+    { "id": "suprema-grande", "categoria_id": "papas-fritas", "nombre": "Suprema Grande", "descripcion": "", "precio": 8000, "orden": 9 },
+    { "id": "suprema-italiana-mediana", "categoria_id": "papas-fritas", "nombre": "Suprema Italiana Mediana", "descripcion": "", "precio": 6000, "orden": 10 },
+    { "id": "suprema-italiana-grande", "categoria_id": "papas-fritas", "nombre": "Suprema Italiana Grande", "descripcion": "", "precio": 8000, "orden": 11 },
+    { "id": "chorrillana-grande", "categoria_id": "papas-fritas", "nombre": "Chorrillana Grande", "descripcion": "", "precio": 15000, "orden": 12 },
+
+    { "id": "empanadita-medialuna-queso", "categoria_id": "picoteo", "nombre": "Queso", "descripcion": "Empanadita medialuna · 5 unidades", "precio": 3000, "orden": 1 },
+    { "id": "empanadita-medialuna-queso-camaron", "categoria_id": "picoteo", "nombre": "Queso Camarón", "descripcion": "Empanadita medialuna · 5 unidades", "precio": 3500, "orden": 2 },
+    { "id": "empanadita-triangular-pollo-mandarin", "categoria_id": "picoteo", "nombre": "Pollo Mandarín", "descripcion": "Empanadita triangular · 5 unidades", "precio": 4000, "orden": 3 },
+    { "id": "empanadita-triangular-carne-mongoliana", "categoria_id": "picoteo", "nombre": "Carne Mongoliana", "descripcion": "Empanadita triangular · 5 unidades", "precio": 4000, "orden": 4 },
+    { "id": "empanadita-triangular-mechada-queso", "categoria_id": "picoteo", "nombre": "Mechada Queso", "descripcion": "Empanadita triangular · 5 unidades", "precio": 4000, "orden": 5 },
+    { "id": "arrollado-primavera", "categoria_id": "picoteo", "nombre": "Arrollado Primavera", "descripcion": "5 unidades", "precio": 4000, "orden": 6 },
+    { "id": "picoteo-nugget-pollo", "categoria_id": "picoteo", "nombre": "Nugget Pollo", "descripcion": "4 unidades", "precio": 1000, "orden": 7 },
+    { "id": "picoteo-aros-cebolla", "categoria_id": "picoteo", "nombre": "Aros de Cebolla", "descripcion": "4 unidades", "precio": 1000, "orden": 8 },
+    { "id": "picoteo-alitas-pollo-crispy", "categoria_id": "picoteo", "nombre": "Alitas Pollo Crispy", "descripcion": "5 unidades", "precio": 4000, "orden": 9 },
+    { "id": "picoteo-palitos-mozzarella", "categoria_id": "picoteo", "nombre": "Palitos de Mozzarella", "descripcion": "", "precio": 3000, "orden": 10 },
+
+    { "id": "bebida-expres-237", "categoria_id": "bebidas", "nombre": "Exprés 237cc", "descripcion": "", "precio": 800, "orden": 1 },
+    { "id": "bebida-personal-350", "categoria_id": "bebidas", "nombre": "Personal 350cc", "descripcion": "", "precio": 1300, "orden": 2 },
+    { "id": "bebida-lata-350", "categoria_id": "bebidas", "nombre": "Lata 350cc", "descripcion": "", "precio": 1300, "orden": 3 },
+    { "id": "bebida-jugo-individual", "categoria_id": "bebidas", "nombre": "Jugo Individual", "descripcion": "", "precio": 1300, "orden": 4 },
+    { "id": "bebida-monster", "categoria_id": "bebidas", "nombre": "Monster", "descripcion": "", "precio": 2000, "orden": 5 },
+    { "id": "bebida-agua-individual", "categoria_id": "bebidas", "nombre": "Agua Individual", "descripcion": "", "precio": 800, "orden": 6 },
+    { "id": "bebida-desechable-1500", "categoria_id": "bebidas", "nombre": "Desechable 1,5 lt", "descripcion": "", "precio": 2500, "orden": 7 },
+    { "id": "bebida-desechable-3000", "categoria_id": "bebidas", "nombre": "Desechable 3 lt", "descripcion": "", "precio": 3500, "orden": 8 }
+  ]
+};
+
+  const cats  = [...CATALOGO.categorias].sort((a,b)=>a.orden-b.orden);
+  const prods = [...CATALOGO.productos].sort((a,b)=>a.orden-b.orden);
+
+  // Proteínas: confirmado por Pipo que el precio no cambia según cuál elija.
+  const PROTEINAS = ["Churrasco","Lomito","Pollo","Hamburguesa"];
+
+  // "Italiano" existe en Sándwich, As y Vienesas a tres precios distintos.
+  // En la carta se distinguen por la sección; en el pedido y en la comanda
+  // impresa esa sección se pierde, así que el nombre la lleva adelante.
+  const PREFIJO = { sandwich:"Sándwich", as:"As", vienesas:"Vienesa" };
+  const nombreLargo = p => PREFIJO[p.categoria_id]
+    ? `${PREFIJO[p.categoria_id]} ${p.nombre}`
+    : p.nombre;
+
+  // Los productos de Picoteo llevan el formato en la descripción ("Empanadita
+  // triangular · 5 unidades"). Eso baja al ticket: la cocina necesita saber
+  // que son 5 y de qué masa.
+  const detalleDe = p => p.categoria_id === "picoteo" ? p.descripcion : "";
+
+  // Los ocho títulos van al mismo tamaño, sin achicarse. Para que eso funcione
+  // en celulares angostos, los dos nombres largos llevan un guion blando (­):
+  // un carácter invisible que solo se ve como guion si la palabra tiene que
+  // partirse ahí. Cortes silábicos válidos: pro-mo-cio-nes, ham-bur-gue-sas.
+  // El navegador no silabea español solo, por eso van a mano.
+  const CORTE = {
+    promociones:  "Promo­ciones",
+    hamburguesas: "Hambur­guesas"
+  };
+  const nombreCuadro = c => CORTE[c.id] || c.nombre;
+
+  const estado = {
+    vista:"inicio", cat:null, prod:null,
+    qty:1, proteina:null, nota:"",
+    carrito:[], cliente:"", notaGeneral:""
+  };
+
+  const clp = n => "$" + n.toLocaleString("es-CL");
+  const $ = id => document.getElementById(id);
+  const totalCarrito  = () => estado.carrito.reduce((s,l)=>s + l.precio*l.qty, 0);
+  const cuentaCarrito = () => estado.carrito.reduce((s,l)=>s + l.qty, 0);
+  const enPedido = id => estado.carrito.filter(l=>l.id===id).reduce((s,l)=>s+l.qty,0);
+
+  const cabeceraHTML = () => `
+    <div class="cabecera">
+      <div class="logo">
+        <span class="nombre marca">Pirulo's</span>
+        <span class="desde">Tradición desde 1982</span>
+      </div>
+      <div class="estado-local">
+        <span class="bolita"></span>
+        <span><b>Abierto</b> · retiro en el local</span>
+      </div>
+    </div>`;
+
+  /* ---------- Portada: cuadrados ---------- */
+  function pintarInicio(){
+    estado.vista = "inicio";
+    $("pantalla").innerHTML = `
+      ${cabeceraHTML()}
+      <div class="portada">
+        <div class="portada-titulo">¿Qué vas a pedir?</div>
+        <div class="cuadros">
+          ${cats.map(c=>{
+            const n = prods.filter(p=>p.categoria_id===c.id).length;
+            return `
+              <button class="cuadro" data-cat="${c.id}">
+                <span class="nom">${nombreCuadro(c)}</span>
+                <span class="cant">${n} ${n===1?"producto":"productos"}</span>
+              </button>`;
+          }).join("")}
+        </div>
+      </div>`;
+    $("pantalla").querySelectorAll("[data-cat]").forEach(b=>{
+      b.onclick = ()=> pintarCategoria(b.dataset.cat);
+    });
+    refrescarBarra();
+  }
+
+  /* ---------- Lista de una sección ---------- */
+  function pintarCategoria(id){
+    estado.vista = "categoria";
+    estado.cat = id;
+    const cat = cats.find(c=>c.id===id);
+    const items = prods.filter(p=>p.categoria_id===id);
+
+    $("pantalla").innerHTML = `
+      <div class="cab-categoria">
+        <button class="btn-atras" id="btnAtras" aria-label="Volver a las secciones">←</button>
+        <span class="txt">
+          <h2>${cat.nombre}</h2>
+          <span>${items.length} ${items.length===1?"producto":"productos"}</span>
+        </span>
+      </div>
+      <div class="seccion">
+        <div class="lista">
+          ${items.map(p=>{
+            const ya = enPedido(p.id);
+            return `
+              <button class="item" data-prod="${p.id}">
+                <span class="item-txt">
+                  <span class="item-nombre">${p.nombre}</span>
+                  ${p.descripcion
+                    ? `<span class="item-desc">${p.descripcion}</span>`
+                    : `<span class="falta-desc">falta descripción</span>`}
+                  ${ya ? `<span class="en-pedido">${ya} en tu pedido</span>` : ""}
+                </span>
+                <span class="item-precio">${clp(p.precio)}</span>
+              </button>`;
+          }).join("")}
+        </div>
+      </div>`;
+
+    $("btnAtras").onclick = pintarInicio;
+    $("pantalla").querySelectorAll("[data-prod]").forEach(b=>{
+      b.onclick = ()=> abrirHoja(b.dataset.prod);
+    });
+    $("pantalla").scrollTop = 0;
+    refrescarBarra();
+  }
+
+  /* ---------- Hoja del producto ---------- */
+  function abrirHoja(id){
+    const p = prods.find(x=>x.id===id);
+    estado.prod = p; estado.qty = 1; estado.nota = "";
+    estado.proteina = p.categoria_id==="sandwich" ? PROTEINAS[0] : null;
+    pintarHoja();
+    $("velo").classList.add("abierto");
+    $("hoja").classList.add("abierta");
+  }
+  function cerrarHoja(){
+    $("velo").classList.remove("abierto");
+    $("hoja").classList.remove("abierta");
+  }
+
+  function pintarHoja(){
+    const p = estado.prod;
+    if(!p) return;
+    const esSandwich = p.categoria_id === "sandwich";
+    const esAs       = p.categoria_id === "as";
+    const esBebida   = p.categoria_id === "bebidas";
+
+    $("hojaCuerpo").innerHTML = `
+      <h3>${nombreLargo(p)}</h3>
+      <div class="precio-base">${clp(p.precio)}</div>
+      ${p.descripcion ? `<p class="desc">${p.descripcion}</p>` : ""}
+
+      ${esSandwich ? `
+        <div class="grupo">
+          <div class="grupo-cab">
+            <h4>Elige la carne</h4>
+            <span class="obligatorio">obligatorio</span>
+          </div>
+          <div class="opciones">
+            ${PROTEINAS.map(t=>`
+              <button class="opcion" data-prot="${t}" aria-pressed="${estado.proteina===t}">${t}</button>
+            `).join("")}
+          </div>
+          <p class="desc" style="margin-top:8px">Todas valen lo mismo. Sale impreso en la comanda.</p>
+        </div>` : ""}
+
+      ${esAs ? `
+        <div class="grupo">
+          <div class="grupo-cab">
+            <h4>Elige la carne</h4>
+            <span class="marca-rev">por confirmar</span>
+          </div>
+          <div class="opciones pendiente">
+            <p>La carta no dice si el As se puede pedir de pollo o de lomito, como el sándwich.
+               Si Miguel confirma que sí, este selector se activa igual que en Sándwich.</p>
+          </div>
+        </div>` : ""}
+
+      ${esBebida ? `
+        <div class="grupo">
+          <div class="grupo-cab">
+            <h4>Elige el sabor</h4>
+            <span class="marca-rev">por confirmar</span>
+          </div>
+          <div class="opciones pendiente">
+            <p>Acá van los sabores que maneja Miguel, todos al mismo precio. Falta la lista.</p>
+          </div>
+        </div>` : ""}
+
+      <div class="grupo">
+        <div class="grupo-cab"><h4>Alguna indicación</h4></div>
+        <textarea class="campo" id="notaProd" rows="2"
+          placeholder="Sin tomate, poca mayo...">${estado.nota}</textarea>
+      </div>
+
+      <div class="pie-hoja">
+        <div class="stepper">
+          <button data-paso="-1" aria-label="Quitar uno">−</button>
+          <span>${estado.qty}</span>
+          <button data-paso="1" aria-label="Agregar uno">+</button>
+        </div>
+        <button class="btn-principal" id="btnAgregar">
+          Agregar ${clp(p.precio * estado.qty)}
+        </button>
+      </div>`;
+
+    $("hojaCuerpo").querySelectorAll("[data-prot]").forEach(b=>{
+      b.onclick = ()=>{ estado.proteina = b.dataset.prot; pintarHoja(); };
+    });
+    $("hojaCuerpo").querySelectorAll("[data-paso]").forEach(b=>{
+      b.onclick = ()=>{ estado.qty = Math.max(1, estado.qty + Number(b.dataset.paso)); pintarHoja(); };
+    });
+    const nota = $("notaProd");
+    if(nota) nota.oninput = e => { estado.nota = e.target.value; };
+    $("btnAgregar").onclick = agregarAlPedido;
+  }
+
+  function agregarAlPedido(){
+    const p = estado.prod;
+    estado.carrito.push({
+      id:p.id,
+      nombre:nombreLargo(p),
+      detalle:detalleDe(p),
+      precio:p.precio,
+      qty:estado.qty,
+      proteina:estado.proteina,
+      nota:estado.nota.trim()
+    });
+    cerrarHoja();
+    pintarCategoria(estado.cat);
+  }
+
+  /* ---------- Barra del pedido ---------- */
+  function refrescarBarra(){
+    const n = cuentaCarrito();
+    const visible = n > 0 && (estado.vista === "inicio" || estado.vista === "categoria");
+    $("barraCarrito").hidden = !visible;
+    $("carritoCuenta").textContent = n;
+    $("carritoTitulo").textContent = n === 1 ? "1 producto" : `${n} productos`;
+    $("carritoTotal").textContent = clp(totalCarrito());
+  }
+
+  /* ---------- Detalle del pedido, editable ---------- */
+  function pintarPedido(){
+    estado.vista = "pedido";
+    const vacio = estado.carrito.length === 0;
+    const n = cuentaCarrito();
+
+    $("pantalla").innerHTML = `
+      <div class="vista">
+        <button class="volver" id="btnVolver">← Seguir pidiendo</button>
+        <h2>Tu pedido</h2>
+        <p class="bajada">${n} ${n===1?"producto":"productos"} · podés cambiar cantidades acá mismo</p>
+        ${vacio ? `<p class="vacio">Todavía no agregas nada.</p>` : `
+          <div>
+            ${estado.carrito.map((l,i)=>`
+              <div class="linea-carrito">
+                <div class="cuerpo">
+                  <div class="nom">${l.nombre}</div>
+                  ${l.detalle  ? `<div class="sub">${l.detalle}</div>` : ""}
+                  ${l.proteina ? `<div class="sub">${l.proteina}</div>` : ""}
+                  ${l.nota     ? `<div class="sub">“${l.nota}”</div>` : ""}
+                  <div class="fila-baja">
+                    <div class="stepper chico">
+                      <button data-mas="${i}" data-d="-1" aria-label="Quitar uno">−</button>
+                      <span>${l.qty}</span>
+                      <button data-mas="${i}" data-d="1" aria-label="Agregar uno">+</button>
+                    </div>
+                    <button class="quitar" data-quitar="${i}">Borrar</button>
+                  </div>
+                </div>
+                <span class="mon">${clp(l.precio * l.qty)}</span>
+              </div>`).join("")}
+          </div>
+          <div class="totales">
+            <span>Total a pagar</span>
+            <span class="mon">${clp(totalCarrito())}</span>
+          </div>
+
+          <div class="grupo">
+            <div class="grupo-cab">
+              <h4>Tu nombre</h4>
+              <span class="obligatorio">obligatorio</span>
+            </div>
+            <input class="campo" id="inpNombre" value="${estado.cliente}"
+              placeholder="¿A nombre de quién?" autocomplete="off">
+          </div>
+
+          <div class="grupo">
+            <div class="grupo-cab"><h4>Nota para el local</h4></div>
+            <textarea class="campo" id="inpNotaGeneral" rows="2"
+              placeholder="Paso a buscar en 20 minutos">${estado.notaGeneral}</textarea>
+          </div>
+
+          <div class="grupo">
+            <button class="btn-principal" id="btnEnviar" style="width:100%"
+              ${estado.cliente.trim() ? "" : "disabled"}>
+              ${estado.cliente.trim() ? `Enviar pedido · ${clp(totalCarrito())}` : "Escribe tu nombre para enviar"}
+            </button>
+            <p class="desc" style="margin-top:10px;text-align:center;font-size:.75rem;color:var(--muted)">
+              Se paga al retirar en el local.
+            </p>
+          </div>
+        `}
+      </div>`;
+
+    $("btnVolver").onclick = ()=> estado.cat ? pintarCategoria(estado.cat) : pintarInicio();
+
+    $("pantalla").querySelectorAll("[data-mas]").forEach(b=>{
+      b.onclick = ()=>{
+        const l = estado.carrito[Number(b.dataset.mas)];
+        l.qty += Number(b.dataset.d);
+        if(l.qty < 1) estado.carrito.splice(Number(b.dataset.mas),1);
+        pintarPedido();
+      };
+    });
+    $("pantalla").querySelectorAll("[data-quitar]").forEach(b=>{
+      b.onclick = ()=>{ estado.carrito.splice(Number(b.dataset.quitar),1); pintarPedido(); };
+    });
+
+    const inp = $("inpNombre");
+    if(inp) inp.oninput = e => {
+      estado.cliente = e.target.value;
+      const btn = $("btnEnviar");
+      btn.disabled = !estado.cliente.trim();
+      btn.textContent = estado.cliente.trim()
+        ? `Enviar pedido · ${clp(totalCarrito())}`
+        : "Escribe tu nombre para enviar";
+    };
+    const ng = $("inpNotaGeneral");
+    if(ng) ng.oninput = e => { estado.notaGeneral = e.target.value; };
+    const env = $("btnEnviar");
+    if(env) env.onclick = pintarListo;
+
+    refrescarBarra();
+    $("pantalla").scrollTop = 0;
+  }
+
+  /* ---------- Comanda impresa (48 caracteres) ---------- */
+  const ANCHO = 48;
+  const centrar = t => " ".repeat(Math.max(0,Math.floor((ANCHO-t.length)/2))) + t;
+  const regla   = () => "-".repeat(ANCHO);
+  function fila(izq, der){
+    const espacio = ANCHO - der.length - 1;
+    const corte = izq.length > espacio ? izq.slice(0, espacio-1)+"…" : izq;
+    return corte + " ".repeat(ANCHO - corte.length - der.length) + der;
+  }
+  // Los nombres largos bajan de línea en vez de cortarse: cortar se comía el
+  // "(5 un)" o el formato de la empanadita, que es lo que la cocina necesita.
+  function filaProducto(izq, der){
+    const espacio = ANCHO - der.length - 1;
+    if(izq.length <= espacio) return [fila(izq, der)];
+    const palabras = izq.split(" ");
+    let primera = "", resto = [];
+    palabras.forEach(w=>{
+      if(!resto.length && (primera ? primera.length+1+w.length : w.length) <= espacio){
+        primera = primera ? primera+" "+w : w;
+      } else { resto.push(w); }
+    });
+    if(!primera) primera = palabras[0].slice(0, espacio);
+    const lineas = [fila(primera, der)];
+    let cont = "   " + resto.join(" ");
+    while(cont.length > ANCHO){
+      let corte = cont.lastIndexOf(" ", ANCHO);
+      if(corte <= 3) corte = ANCHO;
+      lineas.push(cont.slice(0, corte));
+      cont = "   " + cont.slice(corte).trim();
+    }
+    lineas.push(cont);
+    return lineas;
+  }
+
+  function armarComanda(){
+    const L = [];
+    L.push(centrar("PIRULO'S"));
+    L.push(centrar("COMANDA #0042"));
+    L.push(centrar("14/08/2026 21:35"));
+    L.push(regla());
+    L.push("CLIENTE: " + (estado.cliente.trim() || "—"));
+    L.push(regla());
+    estado.carrito.forEach(l=>{
+      filaProducto(`${l.qty}x ${l.nombre}`, clp(l.precio*l.qty)).forEach(x=>L.push(x));
+      if(l.detalle)  L.push("   " + l.detalle);
+      if(l.proteina) L.push("   - " + l.proteina);
+      if(l.nota)     L.push("   - " + l.nota);
+    });
+    L.push(regla());
+    L.push(fila("TOTAL", clp(totalCarrito())));
+    if(estado.notaGeneral.trim()) L.push("NOTA: " + estado.notaGeneral.trim());
+    L.push(regla());
+    L.push(centrar("PAGA AL RETIRAR"));
+    return L.join("\n");
+  }
+
+  function pintarListo(){
+    estado.vista = "listo";
+    $("pantalla").innerHTML = `
+      <div class="vista">
+        <div class="exito">
+          <div class="marca-ok">✓</div>
+          <h2>Pedido enviado</h2>
+          <p>Miguel ya lo vio en la tablet. Te avisamos por WhatsApp cuando esté listo.</p>
+        </div>
+        <div class="ticket-caja">
+          <div class="grupo-cab" style="justify-content:center">
+            <h4>Lo que sale por la impresora</h4>
+            <span class="marca-rev">diseño a ajustar</span>
+          </div>
+          <pre class="ticket">${armarComanda().replace(/</g,"&lt;")}</pre>
+        </div>
+        <div class="grupo">
+          <button class="btn-principal" id="btnReiniciar" style="width:100%">Empezar de nuevo</button>
+        </div>
+      </div>`;
+    $("btnReiniciar").onclick = ()=>{
+      estado.carrito = []; estado.cliente = ""; estado.notaGeneral = ""; estado.cat = null;
+      pintarInicio();
+    };
+    refrescarBarra();
+    $("pantalla").scrollTop = 0;
+  }
+
+  /* ---------- Arranque ---------- */
+  $("barraCarrito").onclick = pintarPedido;
+  $("velo").onclick = cerrarHoja;
+  document.addEventListener("keydown", e => { if(e.key === "Escape") cerrarHoja(); });
+  pintarInicio();
+</script>
