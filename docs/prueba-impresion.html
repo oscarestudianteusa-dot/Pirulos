@@ -66,6 +66,8 @@ Tiene que estar <strong>emparejada antes</strong> en los ajustes de Bluetooth de
 
 <button id="btn-serial" class="principal">Bluetooth (SPP) — recomendado
   <small>Web Serial sobre RFCOMM. Es el camino que sirve para una térmica Bluetooth</small></button>
+<button id="btn-serial-libre" class="chico">Bluetooth (SPP) — sin filtros
+  <small>Diagnóstico: pide el puerto sin pasarle ninguna opción a Chrome</small></button>
 <button id="btn-ble" class="chico">Bluetooth (BLE)
   <small>Solo si la impresora aparece como dispositivo BLE. Lista sus servicios</small></button>
 <button id="btn-usb" class="chico">USB
@@ -287,6 +289,19 @@ async function conectarSerial(){
     const puerto = await navigator.serial.requestPort({
       allowedBluetoothServiceClassIds: [SPP]
     });
+    await abrirSerial(puerto, false);
+  } catch (e){ fallo(e, 'serial'); }
+}
+
+/* Variante de diagnóstico: `requestPort()` pelado, sin una sola opción.
+   Sirve para descartar que el `allowedBluetoothServiceClassIds` sea lo que
+   está dejando la lista vacía. Si así tampoco aparece nada, el problema no
+   es de esta página: es que Chrome no está enumerando puertos RFCOMM. */
+async function conectarSerialLibre(){
+  try{
+    if (!('serial' in navigator)) throw new Error('este Chrome no tiene Web Serial');
+    log('pidiendo puerto serie SIN ninguna opción…');
+    const puerto = await navigator.serial.requestPort();
     await abrirSerial(puerto, false);
   } catch (e){ fallo(e, 'serial'); }
 }
@@ -623,6 +638,7 @@ function habilitar(si){
 }
 
 document.getElementById('btn-serial').onclick  = conectarSerial;
+document.getElementById('btn-serial-libre').onclick = conectarSerialLibre;
 document.getElementById('btn-ble').onclick     = conectarBle;
 document.getElementById('btn-usb').onclick     = conectarUsb;
 document.getElementById('btn-ticket').onclick  = () => enviar(ticketPrueba());
@@ -695,7 +711,7 @@ document.getElementById('btn-copiar').onclick = async () => {
     log('sin Web Serial: o no es Chrome, o es anterior al 138. El Bluetooth SPP ' +
         'necesita Chrome 138 o superior en Android.', 'mal');
 
-  for (const id of ['btn-serial','btn-ble','btn-usb'])
+  for (const id of ['btn-serial','btn-serial-libre','btn-ble','btn-usb'])
     document.getElementById(id).disabled = !window.isSecureContext;
 
   /* Reconexión sin gesto. Esto es la prueba del reinicio de la tablet. */
