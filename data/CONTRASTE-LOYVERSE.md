@@ -12,7 +12,16 @@ está mal, está incompleto, y hay tres cosas que pueden costar plata.
 
 ---
 
-# 🔴 1. Hay DOS tiendas, con precios distintos
+# ✅ 1. Hay DOS tiendas — RESUELTO: el foodtruck queda fuera
+
+> **Decisión de Pipo, 27/10/2026: el foodtruck es un negocio aparte y no entra en este proyecto.
+> Todo se toma de la tienda `Pirulos` (el local).**
+>
+> Con eso el multi-tienda vuelve a ser un no-objetivo de verdad: el modelo de datos **no** lleva
+> precio por tienda, y los precios del foodtruck se ignoran por completo. Lo de abajo queda como
+> registro de por qué se revisó.
+
+
 
 La cuenta tiene **`Pirulos`** y **`Pirulos Foodtruck`**. De los 187 artículos, **133 tienen precio
 distinto entre una y otra** — el foodtruck es sistemáticamente más barato.
@@ -30,13 +39,7 @@ las fotos de la carta.
 **Esto choca con un no-objetivo del `CLAUDE.md`**: "Multi-local, multi-sucursal... Es un local, un
 dueño". Resulta que no: son dos puntos de venta con listas de precios separadas.
 
-**Decisión que hay que tomar:** ¿la carta digital es solo del local, o el foodtruck también la va
-a usar? Si es solo el local, no cambia nada y seguimos igual. Si el foodtruck también, hay que
-meter precio por tienda en el modelo de datos, y eso es trabajo que hoy no está contemplado.
-
-→ **Mi recomendación: solo el local, por ahora.** La Fase 1 ya tiene alcance suficiente. Pero
-conviene que el modelo de datos deje la puerta abierta, porque agregarlo después cuesta mucho más
-que preverlo ahora.
+*(Resuelto arriba: el foodtruck es otro negocio y no entra. Se usa solo la tienda `Pirulos`.)*
 
 # 🔴 2. El precio SÍ cambia según la proteína — en tres casos
 
@@ -166,8 +169,7 @@ En orden de cuánta plata mueven:
 
 # Lo que hay que decidir con Pipo
 
-- Si el modelo de datos contempla **precio por tienda** desde ahora (yo diría que sí: la columna
-  cuesta nada hoy y mucho después).
-- Si los **modificadores llevan precio** (yo diría que sí, por el punto 2).
+- ~~Precio por tienda~~ → **resuelto: no.** El foodtruck queda fuera del proyecto.
+- Si los **modificadores llevan precio** (yo diría que sí, por el punto 2 y por los Extras).
 - Qué hacer con los artículos de Loyverse que no están en la carta física: ¿entran a la carta
   digital o se quedan afuera?
