@@ -43,7 +43,8 @@ También sirve como carta con QR para clientes dentro del local.
   - **La comanda se imprimió sola a los 20 segundos, sin que nadie tocara la tablet.** El requisito que decidía la Fase 1 está cumplido.
   - **Reconecta sola.** MagicOS mató Chrome en pleno uso; al reabrirlo, la página dijo «reconectada sola (Bluetooth SPP)» sin ningún gesto. El ciclo completo está probado: se cae Chrome → se reabre → reconecta → imprime sin que nadie toque nada.
   - **Tildes resueltas** con `FS .` + WPC1252. CP850 también pasó y queda como respaldo; PC437 solo sirve para minúsculas.
-  - Pendiente: convivencia con Loyverse abierto, y el Wake Lock.
+  - **Convive con Loyverse.** Imprimió sola con Loyverse abierto y funcionando. No hay que separar los sistemas por canal: el plan C (Loyverse en Bluetooth, nosotros por USB) queda archivado, no hizo falta.
+  - **Con esto la Fase 0 está cerrada. No queda ningún bloqueador técnico.**
 - **Codificación: WPC1252, con mapeo directo.** Del `0xA0` al `0xFF` Windows-1252 coincide carácter por carácter con Unicode, así que el byte **es** el codepoint y no hace falta tabla a mano. Se eligió sobre CP850 por eso: en la comanda no va solo el texto de la carta, va **el nombre que escribe el cliente y sus notas**, y con una tabla hecha a mano habría que prever cada letra que a alguien se le ocurra. El tramo `0x80–0x9F` (comillas tipográficas, guiones largos, puntos suspensivos — los que pega la gente desde el teclado del celular) sí lleva mapa. Lo que no entra, se imprime sin tilde antes que como símbolo raro.
 - Requisitos que impone:
   - **HTTPS obligatorio** (lo cubre Vercel).
@@ -125,7 +126,7 @@ Cada fase entrega algo que Miguel usa el mismo día. No se avanza a la siguiente
 
 **Decisión de alcance**: las Fases 0 y 1 son el proyecto comprometido. Las Fases 2 en adelante (el POS que reemplaza a Loyverse) se abordan **solo si hay tiempo**, considerando que Pipo está en semestre activo. El sistema debe quedar funcionando y útil aunque el proyecto se detenga al terminar la Fase 1. Nada de la Fase 1 debe requerir que las fases siguientes existan.
 
-### Fase 0 — Reconocimiento (sin código de aplicación)
+### Fase 0 — Reconocimiento ✅ **CERRADA el 27/10/2026**
 - Confirmar todos los PENDIENTES de la sección 8.
 - Fotografiar/anotar la carta completa: productos, precios, modificadores reales que la gente pide.
 - **Prueba de impresión**: página mínima que se conecte a la impresora Bluetooth desde Chrome en la tablet, saque un ticket de prueba y **demuestre que puede imprimir sin que nadie toque la tablet**. **Si esto no funciona, todo lo demás no sirve.** Es el primer entregable técnico y bloquea todo lo demás. → `docs/prueba-impresion.html`, instrucciones en `docs/impresion.md`.
@@ -238,7 +239,7 @@ Confirmar con Miguel antes o durante la Fase 0:
 - [x] ~~Confirmar que la tablet es Android~~ → **Honor Pad X9, modelo ELN-W09, Android 13 (MagicOS 7.1)**. Confirmado por Pipo, 27/10/2026.
 - [x] ~~¿Qué versión de Chrome tiene la tablet?~~ → **Chrome 155.0.8059.81**. Pasa el mínimo de 138 que exige Web Serial sobre Bluetooth. **Bloqueador despejado.**
 - [x] ~~¿Se conecta con adaptador OTG?~~ → la Pad X9 tiene USB-C con **modo host/OTG**, así que el respaldo por cable es posible con un adaptador USB-C a USB-A. Ojo: Honor avisa que al conectar un periférico la tablet puede pasar a carga inversa.
-- [ ] ¿Loyverse suelta el Bluetooth de la impresora, o lo toma en exclusiva? Probar con Loyverse abierto y cerrado. **Es lo único que queda de la Fase 0.**
+- [x] ~~¿Loyverse suelta el Bluetooth de la impresora?~~ → **Sí, conviven.** Imprimió sola con Loyverse abierto, 27/10/2026.
 - [x] ~~¿Qué tabla de caracteres imprime bien las tildes y la ñ?~~ → **WPC1252**, con `FS .` antes. CP850 también sirve. Verificado en papel el 27/10/2026.
 - [x] ~~¿El Bluetooth de la impresora es SPP clásico o BLE?~~ → **SPP**, por Web Serial. Es el camino bueno.
 - [ ] ¿Hay WiFi estable en el local?

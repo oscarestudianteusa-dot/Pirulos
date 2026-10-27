@@ -11,12 +11,13 @@ Ver [CLAUDE.md](CLAUDE.md) para el contexto completo, las restricciones técnica
 |---|---|
 | Catálogo digitalizado | ✅ 8 categorías, 90 productos |
 | Prototipo visual de la carta | ✅ navegable |
-| Impresión por Bluetooth | 🟡 página de prueba lista — **falta probarla en la tablet** |
+| Impresión por Bluetooth | ✅ **probada en la impresora real** — imprime sola, reconecta sola, convive con Loyverse |
 | Carta real (Next.js + Supabase) | ⬜ no empezada |
 | Pantalla de comandas en la tablet | ⬜ no empezada |
 
-**Lo próximo es una sola cosa**: correr la prueba de impresión en la tablet del local.
-Bloquea todo lo demás. Instrucciones en [docs/impresion.md](docs/impresion.md).
+**Fase 0 cerrada el 27/10/2026.** La comanda sale sola por Bluetooth, la tablet reconecta sin que
+nadie toque nada, y las tildes salen bien. No queda ningún bloqueador técnico: lo próximo es
+construir la carta. Detalles en [docs/impresion.md](docs/impresion.md).
 
 ## Qué hay acá
 
