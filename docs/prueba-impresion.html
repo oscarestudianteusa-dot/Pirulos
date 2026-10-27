@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pirulo's · Prueba de impresión</title>
+<style>
+  :root{
+    --fondo:#0E0D0C; --papel:#F4EFE7; --oro:#D9AE55;
+    --verde:#4F9A5B; --rojo:#C0493F; --gris:#8C867C;
+    --caja:#1A1816; --borde:#2E2A26;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:16px 16px 48px; background:var(--fondo); color:var(--papel);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-size:16px; line-height:1.45; -webkit-text-size-adjust:100%;
+  }
+  h1{font-size:22px; margin:0 0 4px}
+  h2{font-size:15px; text-transform:uppercase; letter-spacing:.08em; color:var(--oro);
+     margin:28px 0 10px; border-bottom:1px solid var(--borde); padding-bottom:6px}
+  p{margin:8px 0}
+  .sub{color:var(--gris); font-size:14px; margin:0 0 20px}
+  .caja{background:var(--caja); border:1px solid var(--borde); border-radius:10px; padding:14px; margin:12px 0}
+  button{
+    display:block; width:100%; margin:8px 0; padding:16px;
+    font-size:17px; font-weight:600; font-family:inherit;
+    background:var(--caja); color:var(--papel);
+    border:1px solid var(--borde); border-radius:10px; text-align:left;
+  }
+  button:active{background:#262220}
+  button:disabled{opacity:.4}
+  button.principal{background:var(--oro); color:#1A1308; border-color:var(--oro)}
+  button.chico{font-size:15px; padding:12px}
+  button small{display:block; font-weight:400; font-size:13px; opacity:.75; margin-top:3px}
+  #estado{font-weight:600}
+  .ok{color:var(--verde)} .mal{color:var(--rojo)} .esp{color:var(--oro)}
+  pre{
+    background:#000; color:#C9E7C9; border:1px solid var(--borde); border-radius:8px;
+    padding:10px; font-size:12px; line-height:1.4; white-space:pre-wrap; word-break:break-word;
+    max-height:50vh; overflow:auto; margin:10px 0;
+  }
+  ol,ul{padding-left:22px} li{margin:6px 0}
+  code{background:#000; padding:1px 5px; border-radius:4px; font-size:13px}
+  .aviso{border-left:3px solid var(--oro); padding-left:12px; color:#E8DCC4}
+  a{color:var(--oro)}
+</style>
+</head>
+<body>
+
+<h1>Prueba de impresión — Pirulo's</h1>
+<p class="sub">Xprinter XP-N160II · 80 mm · WebUSB + ESC/POS</p>
+
+<div class="caja">
+  <p>Estado: <span id="estado" class="esp">sin conectar</span></p>
+  <p id="soporte" class="sub" style="margin:0"></p>
+</div>
+
+<h2>1 · Conectar</h2>
+<button id="btn-conectar" class="principal">Conectar impresora
+  <small>Muestra solo dispositivos de clase impresora</small></button>
+<button id="btn-conectar-todo" class="chico">Conectar — mostrar todos los dispositivos
+  <small>Usar si la impresora no aparece en la lista anterior</small></button>
+
+<h2>2 · Pruebas</h2>
+<button id="btn-ticket" disabled>Ticket de prueba
+  <small>Tamaños, negrita, alineación, 48 caracteres y corte</small></button>
+<button id="btn-tildes" disabled>Prueba de tildes y ñ
+  <small>Imprime el mismo texto en PC437, CP850 y WPC1252</small></button>
+<button id="btn-comanda" disabled>Comanda de ejemplo
+  <small>Formato real de comanda, con productos y precios de la carta</small></button>
+<button id="btn-avanzar" class="chico" disabled>Avanzar papel</button>
+<button id="btn-cortar" class="chico" disabled>Cortar papel</button>
+
+<h2>3 · Diagnóstico</h2>
+<p class="sub">Esto es lo que hay que mandarle a Pipo si algo falla.</p>
+<button id="btn-copiar" class="chico">Copiar diagnóstico</button>
+<pre id="log">—</pre>
+
+<h2>Qué anotar</h2>
+<ul>
+  <li>¿La impresora apareció en la lista al tocar <em>Conectar</em>?</li>
+  <li>¿Salió el ticket de prueba completo y cortó el papel?</li>
+  <li><strong>De las tres tablas de caracteres, cuál imprimió bien <em>á é í ó ú ñ</em>.</strong>
+      Ese dato define cómo se imprimen las comandas.</li>
+  <li>¿Funcionó con Loyverse abierto? ¿Y con Loyverse cerrado?</li>
+  <li>El <code>vendorId</code> y <code>productId</code> que muestra el diagnóstico.</li>
+</ul>
+
+<div class="caja aviso">
+  <p><strong>Requisitos</strong>: Chrome en Android (Firefox y Safari no tienen WebUSB),
+  la página abierta por <code>https://</code>, y la impresora conectada por cable USB
+  — con adaptador OTG si la tablet tiene USB-C y el cable es USB-A.</p>
+</div>
+
+<script>
+/* ──────────────────────────────────────────────────────────────────────────
+   Prueba de impresión WebUSB para la Xprinter XP-N160II.
+   Objetivo: responder tres preguntas antes de escribir una línea de la app.
+     1. ¿Chrome en Android puede reclamar la interfaz USB de esta impresora?
+     2. ¿Qué interfaz y qué endpoint hay que usar?
+     3. ¿Qué tabla de caracteres imprime bien las tildes y la ñ?
+   No depende de nada: un archivo, sin librerías.
+   ────────────────────────────────────────────────────────────────────────── */
+
+const ANCHO = 48;              // caracteres por línea, 80 mm, fuente A
+const CLASE_IMPRESORA = 7;     // clase USB "Printer"
+
+let dispositivo = null;
+let interfazNum = null;
+let endpointOut = null;
+
+/* ── log en pantalla: en la tablet no hay consola a mano ── */
+const elLog = document.getElementById('log');
+const lineas = [];
+function log(txt, tipo){
+  const hora = new Date().toTimeString().slice(0,8);
+  const marca = tipo === 'mal' ? '✗' : tipo === 'ok' ? '✓' : '·';
+  lineas.push(hora + ' ' + marca + ' ' + txt);
+  elLog.textContent = lineas.join('\n');
+  elLog.scrollTop = elLog.scrollHeight;
+}
+function estado(txt, clase){
+  const el = document.getElementById('estado');
+  el.textContent = txt;
+  el.className = clase || 'esp';
+}
+
+/* ── tablas de caracteres ───────────────────────────────────────────────────
+   La impresora no entiende UTF-8: recibe un byte por carácter e interpreta
+   ese byte según la tabla activa (comando ESC t n). Por eso hay que mandar
+   los bytes de la tabla correcta, y por eso esta prueba imprime las tres
+   candidatas: la que salga legible es la que usa la app.
+   PC437 y CP850 comparten posición para las minúsculas acentuadas; se
+   diferencian en las mayúsculas (Á, Í, Ó, Ú solo existen en CP850).         */
+const BASE_DOS = {           // común a PC437 y CP850
+  'á':0xA0,'é':0x82,'í':0xA1,'ó':0xA2,'ú':0xA3,'ü':0x81,
+  'ñ':0xA4,'Ñ':0xA5,'É':0x90,'Ü':0x9A,
+  '¿':0xA8,'¡':0xAD,'°':0xF8,'·':0xFA,'ª':0xA6,'º':0xA7
+};
+const TABLAS = {
+  PC437:   { esc_t:0,  mapa: BASE_DOS },
+  CP850:   { esc_t:2,  mapa: Object.assign({}, BASE_DOS,
+             {'Á':0xB5,'Í':0xD6,'Ó':0xE0,'Ú':0xE9}) },
+  WPC1252: { esc_t:16, mapa: {
+             'á':0xE1,'é':0xE9,'í':0xED,'ó':0xF3,'ú':0xFA,'ü':0xFC,
+             'ñ':0xF1,'Ñ':0xD1,'Á':0xC1,'É':0xC9,'Í':0xCD,'Ó':0xD3,'Ú':0xDA,'Ü':0xDC,
+             '¿':0xBF,'¡':0xA1,'°':0xB0,'·':0xB7,'ª':0xAA,'º':0xBA } }
+};
+/* Último recurso: si un carácter no está en la tabla, se manda sin tilde.
+   Mejor "Sandwich" que un símbolo raro en medio de la comanda. */
+const SIN_TILDE = {
+  'á':'a','é':'e','í':'i','ó':'o','ú':'u','ü':'u','ñ':'n',
+  'Á':'A','É':'E','Í':'I','Ó':'O','Ú':'U','Ü':'U','Ñ':'N',
+  '¿':'?','¡':'!','°':'o','·':'-','ª':'a','º':'o','—':'-','–':'-',
+  '“':'"','”':'"','‘':"'",'’':"'",'…':'...'
+};
+
+function aBytes(texto, nombreTabla){
+  const mapa = TABLAS[nombreTabla].mapa;
+  const out = [];
+  for (const ch of texto){
+    const cod = ch.codePointAt(0);
+    if (cod < 128){ out.push(cod); continue; }      // ASCII tal cual
+    if (mapa[ch] !== undefined){ out.push(mapa[ch]); continue; }
+    const plano = SIN_TILDE[ch];
+    if (plano){ for (const c of plano) out.push(c.charCodeAt(0)); continue; }
+    out.push(0x3F);                                  // '?'
+  }
+  return out;
+}
+
+/* ── comandos ESC/POS ── */
+const ESC = 0x1B, GS = 0x1D;
+const CMD = {
+  init:      [ESC, 0x40],
+  tabla:     n => [ESC, 0x74, n],
+  izq:       [ESC, 0x61, 0],
+  centro:    [ESC, 0x61, 1],
+  der:       [ESC, 0x61, 2],
+  negrita:   s => [ESC, 0x45, s ? 1 : 0],
+  doble:     [GS, 0x21, 0x11],
+  normal:    [GS, 0x21, 0x00],
+  altoDoble: [GS, 0x21, 0x01],
+  subrayado: s => [ESC, 0x2D, s ? 1 : 0],
+  avanzar:   n => [ESC, 0x64, n],
+  cortar:    [GS, 0x56, 0x42, 0x00]    // corte parcial con avance previo
+};
+
+/* Constructor de tickets: acumula bytes y codifica el texto con la tabla
+   elegida. Mantiene el texto del ticket legible en el código. */
+function Ticket(nombreTabla){
+  const buf = [];
+  let tabla = nombreTabla;
+  const api = {
+    cmd(a){ buf.push(...a); return api; },
+    /* Cambia la tabla activa: manda el ESC t a la impresora y codifica de
+       ahí en adelante con esa tabla. Las dos cosas van juntas o el papel
+       sale con basura. */
+    usarTabla(nombre){ tabla = nombre; buf.push(...CMD.tabla(TABLAS[nombre].esc_t)); return api; },
+    txt(t){ buf.push(...aBytes(t, tabla)); return api; },
+    ln(t){ return api.txt((t === undefined ? '' : t) + '\n'); },
+    sep(c){ return api.ln((c || '-').repeat(ANCHO)); },
+    /* izquierda + derecha en la misma línea, rellenando con espacios.
+       Si no cabe, el lado izquierdo baja de línea completo: cortarlo se
+       come el final del nombre, que es justo el dato que importa. */
+    par(izq, der){
+      const libre = ANCHO - der.length;
+      if (izq.length <= libre - 1) return api.ln(izq + ' '.repeat(libre - izq.length) + der);
+      api.ln(izq);
+      return api.ln(' '.repeat(libre) + der);
+    },
+    bytes(){ return new Uint8Array(buf); }
+  };
+  return api;
+}
+
+const pesos = n => '$ ' + n.toLocaleString('es-CL');
+
+/* ── conexión ───────────────────────────────────────────────────────────── */
+function describir(d){
+  const info = {
+    fabricante: d.manufacturerName || '(sin nombre)',
+    producto: d.productName || '(sin nombre)',
+    serie: d.serialNumber || '(sin serie)',
+    vendorId: '0x' + d.vendorId.toString(16).padStart(4,'0'),
+    productId: '0x' + d.productId.toString(16).padStart(4,'0'),
+    configuraciones: d.configurations.map(c => ({
+      valor: c.configurationValue,
+      interfaces: c.interfaces.map(i => ({
+        numero: i.interfaceNumber,
+        alternativas: i.alternates.map(a => ({
+          clase: a.interfaceClass, subclase: a.interfaceSubclass, protocolo: a.interfaceProtocol,
+          endpoints: a.endpoints.map(e =>
+            `#${e.endpointNumber} ${e.direction} ${e.type} ${e.packetSize}b`)
+        }))
+      }))
+    }))
+  };
+  return JSON.stringify(info, null, 2);
+}
+
+/* Busca la interfaz y el endpoint a usar. No se hardcodea interfaz 0 /
+   endpoint 1: hay modelos que exponen varias y la que sirve no siempre es
+   la primera. Se prefiere la de clase 7 (Printer) con un bulk OUT. */
+function candidatos(d){
+  const lista = [];
+  for (const intf of d.configuration.interfaces){
+    for (const alt of intf.alternates){
+      const out = alt.endpoints.find(e => e.direction === 'out' && e.type === 'bulk');
+      if (!out) continue;
+      lista.push({
+        interfaz: intf.interfaceNumber,
+        endpoint: out.endpointNumber,
+        clase: alt.interfaceClass,
+        prioridad: alt.interfaceClass === CLASE_IMPRESORA ? 0 : 1
+      });
+    }
+  }
+  return lista.sort((a,b) => a.prioridad - b.prioridad);
+}
+
+async function usar(d){
+  dispositivo = d;
+  log('dispositivo: ' + (d.productName || '(sin nombre)') +
+      ' · vendorId 0x' + d.vendorId.toString(16).padStart(4,'0') +
+      ' · productId 0x' + d.productId.toString(16).padStart(4,'0'), 'ok');
+
+  await d.open();
+  log('open() ok', 'ok');
+
+  if (!d.configuration) await d.selectConfiguration(1);
+  log('configuración ' + d.configuration.configurationValue + ' seleccionada', 'ok');
+
+  log('descriptores:\n' + describir(d));
+
+  const opciones = candidatos(d);
+  if (!opciones.length) throw new Error('la impresora no expone ningún endpoint bulk OUT');
+  log('candidatos: ' + opciones.map(o => `interfaz ${o.interfaz}/endpoint ${o.endpoint} (clase ${o.clase})`).join(', '));
+
+  let ultimoError = null;
+  for (const o of opciones){
+    try {
+      await d.claimInterface(o.interfaz);
+      interfazNum = o.interfaz;
+      endpointOut = o.endpoint;
+      log('claimInterface(' + o.interfaz + ') ok · endpoint ' + o.endpoint, 'ok');
+      break;
+    } catch (e){
+      ultimoError = e;
+      log('claimInterface(' + o.interfaz + ') falló: ' + e.message, 'mal');
+    }
+  }
+  if (interfazNum === null) throw ultimoError || new Error('no se pudo reclamar ninguna interfaz');
+
+  estado('conectada', 'ok');
+  habilitar(true);
+}
+
+async function conectar(soloImpresoras){
+  try{
+    log('pidiendo dispositivo' + (soloImpresoras ? ' (clase impresora)' : ' (todos)') + '…');
+    const d = await navigator.usb.requestDevice({
+      filters: soloImpresoras ? [{ classCode: CLASE_IMPRESORA }] : []
+    });
+    await usar(d);
+  } catch (e){
+    if (e.name === 'NotFoundError'){
+      log('no se eligió ningún dispositivo' +
+          (soloImpresoras ? ' — si la lista salió vacía, probar el botón de abajo' : ''), 'mal');
+    } else {
+      log('error al conectar: ' + e.name + ' — ' + e.message, 'mal');
+      explicar(e);
+    }
+    estado('sin conectar', 'mal');
+  }
+}
+
+function explicar(e){
+  const m = (e.message || '') + ' ' + (e.name || '');
+  if (/denied|security/i.test(m))
+    log('pista: otra app tiene tomada la interfaz USB. Cerrar Loyverse y cualquier ' +
+        'servicio de impresión (RawBT) y volver a probar.', 'mal');
+  if (/busy|in use/i.test(m))
+    log('pista: el dispositivo está ocupado. Desconectar y reconectar el cable USB.', 'mal');
+  if (/transfer|stall/i.test(m))
+    log('pista: la transferencia se rechazó. Revisar que haya papel y que la tapa esté cerrada.', 'mal');
+}
+
+/* ── envío ──────────────────────────────────────────────────────────────── */
+const TROZO = 4096;   // los transferOut grandes fallan en algunos Android
+
+async function enviar(bytes){
+  if (!dispositivo || endpointOut === null){ log('no hay impresora conectada', 'mal'); return; }
+  try{
+    for (let i = 0; i < bytes.length; i += TROZO){
+      const parte = bytes.slice(i, i + TROZO);
+      const r = await dispositivo.transferOut(endpointOut, parte);
+      if (r.status !== 'ok') throw new Error('transferOut devolvió ' + r.status);
+    }
+    log('enviados ' + bytes.length + ' bytes', 'ok');
+  } catch (e){
+    log('error al imprimir: ' + e.name + ' — ' + e.message, 'mal');
+    explicar(e);
+  }
+}
+
+/* ── los tickets ────────────────────────────────────────────────────────── */
+function ticketPrueba(){
+  const t = Ticket('PC437');
+  t.cmd(CMD.init).cmd(CMD.tabla(TABLAS.PC437.esc_t));
+  t.cmd(CMD.centro).cmd(CMD.doble).ln("PIRULO'S").cmd(CMD.normal);
+  t.ln('PRUEBA DE IMPRESION').cmd(CMD.izq);
+  t.sep();
+  t.ln('Fecha: ' + new Date().toLocaleString('es-CL'));
+  t.sep();
+  t.ln('Texto normal de 48 caracteres de ancho:');
+  t.ln('123456789012345678901234567890123456789012345678');
+  t.ln('....|....1....|....2....|....3....|....4....|..8');
+  t.ln();
+  t.cmd(CMD.negrita(1)).ln('NEGRITA: la cocina lee esto de lejos').cmd(CMD.negrita(0));
+  t.cmd(CMD.altoDoble).ln('ALTO DOBLE').cmd(CMD.normal);
+  t.cmd(CMD.doble).ln('DOBLE').cmd(CMD.normal);
+  t.ln();
+  t.cmd(CMD.centro).ln('centrado').cmd(CMD.der).ln('a la derecha').cmd(CMD.izq);
+  t.ln();
+  t.par('Columna izquierda', 'derecha');
+  t.par('Un nombre de producto muy largo que no cabe en la linea', '$ 99.999');
+  t.sep('=');
+  t.cmd(CMD.centro).ln('Si llegaste hasta aca y corto el papel,').ln('WebUSB funciona.').cmd(CMD.izq);
+  t.cmd(CMD.avanzar(4)).cmd(CMD.cortar);
+  return t.bytes();
+}
+
+function ticketTildes(){
+  /* Un solo ticket con las tres tablas, para poder compararlas en el papel.
+     Los encabezados van en ASCII puro a propósito: se imprimen igual con
+     cualquier tabla activa, así que siempre se puede leer de qué bloque es
+     cada muestra incluso si la muestra sale ilegible. */
+  const muestra = 'aeiou: á é í ó ú · ñ Ñ ü · ¿Qué? ¡Sí! · 20° · AEIOU: Á É Í Ó Ú';
+  const reales  = 'Sándwich Italiano · Alemán · Dinámico · Camarón · Mandarín · Champiñón · Ají';
+
+  const t = Ticket('PC437');
+  t.cmd(CMD.init).usarTabla('PC437');
+  t.cmd(CMD.centro).cmd(CMD.doble).ln("PIRULO'S").cmd(CMD.normal);
+  t.ln('TABLAS DE CARACTERES').cmd(CMD.izq);
+
+  for (const nombre of ['PC437','CP850','WPC1252']){
+    t.sep();
+    t.cmd(CMD.negrita(1)).ln(nombre + '   (ESC t ' + TABLAS[nombre].esc_t + ')').cmd(CMD.negrita(0));
+    t.usarTabla(nombre).ln(muestra).ln(reales);
+  }
+
+  t.usarTabla('PC437').sep('=');
+  t.cmd(CMD.centro).ln('Anotar cual de las tres salio legible.').cmd(CMD.izq);
+  t.cmd(CMD.avanzar(4)).cmd(CMD.cortar);
+  return t.bytes();
+}
+
+function ticketComanda(){
+  /* Formato de comanda del CLAUDE.md, con productos y precios reales de
+     data/catalogo.json. El número, la hora y el cliente son de prueba:
+     dicen PRUEBA en grande para que nadie lo confunda con un pedido. */
+  const t = Ticket('PC437');
+  const items = [
+    { cant:2, nombre:'Sándwich Italiano', precio:4600,
+      sub:[], mods:['Churrasco'], notas:['sin tomate'] },
+    { cant:1, nombre:'Papas Fritas Grande', precio:5000, sub:[], mods:[], notas:[] },
+    { cant:1, nombre:'Mechada Queso', precio:4000,
+      sub:['Empanadita triangular · 5 unidades'], mods:[], notas:[] }
+  ];
+  const total = items.reduce((s,i) => s + i.cant * i.precio, 0);
+
+  t.cmd(CMD.init).cmd(CMD.tabla(TABLAS.PC437.esc_t));
+  t.cmd(CMD.centro).cmd(CMD.doble).ln("PIRULO'S").cmd(CMD.normal);
+  t.cmd(CMD.negrita(1)).ln('*** COMANDA DE PRUEBA ***').cmd(CMD.negrita(0));
+  t.cmd(CMD.altoDoble).ln('COMANDA #0000').cmd(CMD.normal);
+  t.ln(new Date().toLocaleString('es-CL')).cmd(CMD.izq);
+  t.sep();
+  t.cmd(CMD.negrita(1)).ln('CLIENTE: Prueba').cmd(CMD.negrita(0));
+  t.ln('ORIGEN: whatsapp');
+  t.sep();
+  for (const i of items){
+    t.par(i.cant + 'x ' + i.nombre, pesos(i.cant * i.precio));
+    for (const s of i.sub)   t.ln('   ' + s);
+    for (const m of i.mods)  t.ln('   * ' + m);
+    for (const n of i.notas) t.ln('   - ' + n);
+  }
+  t.sep();
+  t.cmd(CMD.doble).par('TOTAL', pesos(total)).cmd(CMD.normal);
+  t.sep();
+  t.ln('NOTA: pasa a buscar en 20 min');
+  t.cmd(CMD.avanzar(4)).cmd(CMD.cortar);
+  return t.bytes();
+}
+
+/* ── arranque y botones ─────────────────────────────────────────────────── */
+function habilitar(si){
+  for (const id of ['btn-ticket','btn-tildes','btn-comanda','btn-avanzar','btn-cortar'])
+    document.getElementById(id).disabled = !si;
+}
+
+document.getElementById('btn-conectar').onclick      = () => conectar(true);
+document.getElementById('btn-conectar-todo').onclick = () => conectar(false);
+document.getElementById('btn-ticket').onclick   = () => enviar(ticketPrueba());
+document.getElementById('btn-tildes').onclick   = () => enviar(ticketTildes());
+document.getElementById('btn-comanda').onclick  = () => enviar(ticketComanda());
+document.getElementById('btn-avanzar').onclick  = () => enviar(new Uint8Array(CMD.avanzar(5)));
+document.getElementById('btn-cortar').onclick   = () => enviar(new Uint8Array(CMD.cortar));
+
+document.getElementById('btn-copiar').onclick = async () => {
+  const texto = [
+    'Pirulo\'s — diagnóstico de impresión',
+    new Date().toISOString(),
+    'navegador: ' + navigator.userAgent,
+    'contexto seguro: ' + window.isSecureContext,
+    'url: ' + location.href,
+    '',
+    lineas.join('\n')
+  ].join('\n');
+  try{
+    await navigator.clipboard.writeText(texto);
+    log('diagnóstico copiado al portapapeles', 'ok');
+  } catch {
+    log('no se pudo copiar automáticamente: seleccionar el texto del recuadro a mano', 'mal');
+  }
+};
+
+/* El permiso USB se concede una vez y queda guardado para este sitio.
+   Al volver a abrir la página, el dispositivo ya autorizado se reconecta
+   sin pedir nada. En la app esto es lo que permite que la tablet imprima
+   sola después de un reinicio: el permiso sobrevive, no hay que tocar nada. */
+(async function arranque(){
+  const sop = document.getElementById('soporte');
+  if (!('usb' in navigator)){
+    sop.innerHTML = '<span class="mal">Este navegador no tiene WebUSB.</span> ' +
+      'Hay que abrir esta página en <strong>Chrome para Android</strong>. ' +
+      'Firefox y Safari no la soportan.';
+    log('navigator.usb no existe — navegador sin WebUSB', 'mal');
+    log('navegador: ' + navigator.userAgent);
+    document.getElementById('btn-conectar').disabled = true;
+    document.getElementById('btn-conectar-todo').disabled = true;
+    return;
+  }
+  if (!window.isSecureContext){
+    sop.innerHTML = '<span class="mal">La página no está en un contexto seguro.</span> ' +
+      'WebUSB exige <code>https://</code> o <code>localhost</code>.';
+    log('isSecureContext = false — WebUSB no va a funcionar acá', 'mal');
+  } else {
+    sop.textContent = 'WebUSB disponible.';
+    log('WebUSB disponible · ' + navigator.userAgent);
+  }
+
+  navigator.usb.addEventListener('disconnect', ev => {
+    if (ev.device === dispositivo){
+      log('la impresora se desconectó', 'mal');
+      dispositivo = null; interfazNum = null; endpointOut = null;
+      estado('desconectada', 'mal');
+      habilitar(false);
+    }
+  });
+
+  try{
+    const previos = await navigator.usb.getDevices();
+    if (previos.length){
+      log('hay ' + previos.length + ' dispositivo(s) ya autorizado(s), reconectando…');
+      await usar(previos[0]);
+    }
+  } catch (e){
+    log('no se pudo reconectar el dispositivo guardado: ' + e.message, 'mal');
+  }
+})();
+</script>
+</body>
+</html>

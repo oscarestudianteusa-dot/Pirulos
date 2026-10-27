@@ -30,7 +30,7 @@ También sirve como carta con QR para clientes dentro del local.
 | Protocolo | ESC/POS y OPOS nativos, sin driver |
 | Corte | Automático (`GS V B 0`) |
 | Tabla de caracteres | PC437 por defecto; probar CP850 / WPC1252 para tildes y ñ |
-| VendorId USB esperado | `0x0483` (STMicroelectronics) |
+| VendorId USB esperado | `0x0483` (STMicroelectronics) — **sin confirmar**: no aparece en fuentes oficiales de Xprinter, solo como ejemplo genérico en código de terceros. La página de prueba muestra el real. No filtrar por este valor. |
 | Buffer de entrada | 96 KB |
 | Extra disponible | Puerto RJ11 para cajón de dinero |
 
