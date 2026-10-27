@@ -29,13 +29,18 @@ También sirve como carta con QR para clientes dentro del local.
 | Velocidad | 160–200 mm/s |
 | Protocolo | ESC/POS y OPOS nativos, sin driver |
 | Corte | Automático (`GS V B 0`) |
-| Tabla de caracteres | PC437 por defecto; probar CP850 / WPC1252 para tildes y ñ |
+| Tabla de caracteres | **Viene en modo de doble byte (kanji / GB chino) de fábrica.** Mientras ese modo esté activo la impresora ignora el `ESC t`: toma el byte de la `á` como inicio de un carácter chino y se come el byte siguiente (`Sándwich` → `S爅dwich`). **Hay que mandar `FS .` (`1C 2E`) después del `ESC @` y antes del `ESC t`.** Verificado en papel el 27/10/2026. Qué tabla usar después: pendiente de la segunda prueba |
 | VendorId USB esperado | `0x0483` (STMicroelectronics) — **sin confirmar**: no aparece en fuentes oficiales de Xprinter, solo como ejemplo genérico en código de terceros. La página de prueba muestra el real. No filtrar por este valor. |
 | Buffer de entrada | 96 KB |
 | Extra disponible | Puerto RJ11 para cajón de dinero |
 
 - **Se conecta por Bluetooth a la tablet** del local (confirmado por Pipo, 27/10/2026). Acepta también USB, que queda como respaldo.
 - **Estrategia adoptada: Web Serial sobre Bluetooth RFCOMM (SPP).** Chrome lo soporta en Android **desde la versión 138**, sin flags. El navegador envía comandos ESC/POS crudos directo a la impresora. Sin app puente, sin drivers, sin licencias.
+- ✅ **PROBADO EN LA IMPRESORA REAL el 27/10/2026**, en la Honor Pad X9 con Chrome 155:
+  - La conexión por SPP funciona (el ticket imprime `Via: serial`).
+  - Los 48 caracteres son exactos, el corte automático funciona, y negrita / alto doble / centrado / alineación a la derecha salen bien.
+  - **La comanda se imprimió sola a los 20 segundos, sin que nadie tocara la tablet.** El requisito que decidía la Fase 1 está cumplido.
+  - Pendiente de la segunda vuelta: tildes con `FS .`, reconexión al recargar, y convivencia con Loyverse.
 - Requisitos que impone:
   - **HTTPS obligatorio** (lo cubre Vercel).
   - **Chrome en Android 138 o superior.** Firefox y Safari no implementan ninguna de estas APIs.
