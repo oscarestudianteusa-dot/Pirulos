@@ -29,7 +29,8 @@ También sirve como carta con QR para clientes dentro del local.
 | Velocidad | 160–200 mm/s |
 | Protocolo | ESC/POS y OPOS nativos, sin driver |
 | Corte | Automático (`GS V B 0`) |
-| Tabla de caracteres | **Viene en modo de doble byte (kanji / GB chino) de fábrica.** Mientras ese modo esté activo la impresora ignora el `ESC t`: toma el byte de la `á` como inicio de un carácter chino y se come el byte siguiente (`Sándwich` → `S爅dwich`). **Hay que mandar `FS .` (`1C 2E`) después del `ESC @` y antes del `ESC t`.** Verificado en papel el 27/10/2026. Qué tabla usar después: pendiente de la segunda prueba |
+| Tabla de caracteres | **WPC1252 (`ESC t 16`)**, y antes **obligatoriamente `FS .`**. Ver abajo. Verificado en papel el 27/10/2026 |
+| Secuencia de inicio | `ESC @` · `FS .` · `ESC t 16` → `1B 40 · 1C 2E · 1B 74 10`. **El `FS .` no es opcional**: la impresora viene de fábrica en modo de doble byte (kanji / GB chino) y mientras ese modo esté activo ignora el `ESC t` — toma el byte de la `á` como inicio de un carácter chino y se come el byte siguiente (`Sándwich` salía `S爅dwich`). Con `FS .` las tres tablas funcionan |
 | VendorId USB esperado | `0x0483` (STMicroelectronics) — **sin confirmar**: no aparece en fuentes oficiales de Xprinter, solo como ejemplo genérico en código de terceros. La página de prueba muestra el real. No filtrar por este valor. |
 | Buffer de entrada | 96 KB |
 | Extra disponible | Puerto RJ11 para cajón de dinero |
@@ -40,7 +41,10 @@ También sirve como carta con QR para clientes dentro del local.
   - La conexión por SPP funciona (el ticket imprime `Via: serial`).
   - Los 48 caracteres son exactos, el corte automático funciona, y negrita / alto doble / centrado / alineación a la derecha salen bien.
   - **La comanda se imprimió sola a los 20 segundos, sin que nadie tocara la tablet.** El requisito que decidía la Fase 1 está cumplido.
-  - Pendiente de la segunda vuelta: tildes con `FS .`, reconexión al recargar, y convivencia con Loyverse.
+  - **Reconecta sola.** MagicOS mató Chrome en pleno uso; al reabrirlo, la página dijo «reconectada sola (Bluetooth SPP)» sin ningún gesto. El ciclo completo está probado: se cae Chrome → se reabre → reconecta → imprime sin que nadie toque nada.
+  - **Tildes resueltas** con `FS .` + WPC1252. CP850 también pasó y queda como respaldo; PC437 solo sirve para minúsculas.
+  - Pendiente: convivencia con Loyverse abierto, y el Wake Lock.
+- **Codificación: WPC1252, con mapeo directo.** Del `0xA0` al `0xFF` Windows-1252 coincide carácter por carácter con Unicode, así que el byte **es** el codepoint y no hace falta tabla a mano. Se eligió sobre CP850 por eso: en la comanda no va solo el texto de la carta, va **el nombre que escribe el cliente y sus notas**, y con una tabla hecha a mano habría que prever cada letra que a alguien se le ocurra. El tramo `0x80–0x9F` (comillas tipográficas, guiones largos, puntos suspensivos — los que pega la gente desde el teclado del celular) sí lleva mapa. Lo que no entra, se imprime sin tilde antes que como símbolo raro.
 - Requisitos que impone:
   - **HTTPS obligatorio** (lo cubre Vercel).
   - **Chrome en Android 138 o superior.** Firefox y Safari no implementan ninguna de estas APIs.
@@ -234,9 +238,9 @@ Confirmar con Miguel antes o durante la Fase 0:
 - [x] ~~Confirmar que la tablet es Android~~ → **Honor Pad X9, modelo ELN-W09, Android 13 (MagicOS 7.1)**. Confirmado por Pipo, 27/10/2026.
 - [x] ~~¿Qué versión de Chrome tiene la tablet?~~ → **Chrome 155.0.8059.81**. Pasa el mínimo de 138 que exige Web Serial sobre Bluetooth. **Bloqueador despejado.**
 - [x] ~~¿Se conecta con adaptador OTG?~~ → la Pad X9 tiene USB-C con **modo host/OTG**, así que el respaldo por cable es posible con un adaptador USB-C a USB-A. Ojo: Honor avisa que al conectar un periférico la tablet puede pasar a carga inversa.
-- [ ] ¿El Bluetooth de la impresora es SPP clásico, BLE, o los dos? (lo responde la página de prueba)
-- [ ] ¿Loyverse suelta el Bluetooth de la impresora, o lo toma en exclusiva? Probar con Loyverse abierto y cerrado.
-- [ ] ¿Qué tabla de caracteres imprime bien las tildes y la ñ? (probar CP850, PC437, WPC1252)
+- [ ] ¿Loyverse suelta el Bluetooth de la impresora, o lo toma en exclusiva? Probar con Loyverse abierto y cerrado. **Es lo único que queda de la Fase 0.**
+- [x] ~~¿Qué tabla de caracteres imprime bien las tildes y la ñ?~~ → **WPC1252**, con `FS .` antes. CP850 también sirve. Verificado en papel el 27/10/2026.
+- [x] ~~¿El Bluetooth de la impresora es SPP clásico o BLE?~~ → **SPP**, por Web Serial. Es el camino bueno.
 - [ ] ¿Hay WiFi estable en el local?
 - [ ] ¿Cuántos productos tiene la carta? ¿Hay variantes (tamaños, combos)?
 - [ ] ¿Qué modificaciones pide la gente realmente? (sin tomate, extra queso, etc.)

@@ -144,6 +144,7 @@ pero no para <em>escribirle</em> después. Esto lo comprueba.</p>
    ────────────────────────────────────────────────────────────────────────── */
 
 const ANCHO = 48;              // caracteres por línea, 80 mm, fuente A
+const TABLA = 'WPC1252';       // la tabla del sistema, verificada en papel
 const CLASE_IMPRESORA = 7;     // clase USB "Printer"
 const SPP = '00001101-0000-1000-8000-00805f9b34fb';   // Serial Port Profile
 
@@ -199,10 +200,24 @@ const TABLAS = {
   PC437:   { esc_t:0,  mapa: BASE_DOS },
   CP850:   { esc_t:2,  mapa: Object.assign({}, BASE_DOS,
              {'Á':0xB5,'Í':0xD6,'Ó':0xE0,'Ú':0xE9}) },
-  WPC1252: { esc_t:16, mapa: {
-             'á':0xE1,'é':0xE9,'í':0xED,'ó':0xF3,'ú':0xFA,'ü':0xFC,
-             'ñ':0xF1,'Ñ':0xD1,'Á':0xC1,'É':0xC9,'Í':0xCD,'Ó':0xD3,'Ú':0xDA,'Ü':0xDC,
-             '¿':0xBF,'¡':0xA1,'°':0xB0,'·':0xB7,'ª':0xAA,'º':0xBA } }
+  /* WPC1252 es la que usa el sistema. Verificada en papel el 27/10/2026:
+     imprime bien todo lo que usa la carta, mayúsculas acentuadas incluidas.
+     CP850 también pasó y queda como respaldo probado.
+
+     La elegimos sobre CP850 por una razón práctica: del 0xA0 al 0xFF,
+     Windows-1252 coincide carácter por carácter con Unicode. O sea que el
+     byte ES el codepoint y no hace falta ninguna tabla a mano. Eso importa
+     porque en la comanda no va solo el texto de la carta: va el nombre que
+     escribe el cliente y sus notas. Con una tabla hecha a mano habría que
+     haber previsto cada letra que a alguien se le ocurra escribir; así
+     funcionan todas las latinas sin adivinar.
+     Lo único que no sigue a Unicode es el tramo 0x80–0x9F, donde 1252 mete
+     comillas tipográficas, guiones largos y puntos suspensivos — que son
+     justo los que pega la gente desde el teclado del celular. Van abajo. */
+  WPC1252: { esc_t:16, latin1: true, mapa: {
+             '€':0x80,'…':0x85,'†':0x86,'‡':0x87,'‰':0x89,
+             '‘':0x91,'’':0x92,'“':0x93,'”':0x94,'•':0x95,'–':0x96,'—':0x97,
+             '™':0x99,'š':0x9A,'œ':0x9C,'ž':0x9E,'Ÿ':0x9F } }
 };
 /* Último recurso: si un carácter no está en la tabla, se manda sin tilde.
    Mejor "Sandwich" que un símbolo raro en medio de la comanda. */
@@ -214,12 +229,15 @@ const SIN_TILDE = {
 };
 
 function aBytes(texto, nombreTabla){
-  const mapa = TABLAS[nombreTabla].mapa;
+  const tabla = TABLAS[nombreTabla];
   const out = [];
   for (const ch of texto){
     const cod = ch.codePointAt(0);
     if (cod < 128){ out.push(cod); continue; }      // ASCII tal cual
-    if (mapa[ch] !== undefined){ out.push(mapa[ch]); continue; }
+    /* En WPC1252 el tramo 0xA0–0xFF es Unicode byte por byte: cualquier
+       letra latina que escriba un cliente sale sin tabla de por medio. */
+    if (tabla.latin1 && cod >= 0xA0 && cod <= 0xFF){ out.push(cod); continue; }
+    if (tabla.mapa[ch] !== undefined){ out.push(tabla.mapa[ch]); continue; }
     const plano = SIN_TILDE[ch];
     if (plano){ for (const c of plano) out.push(c.charCodeAt(0)); continue; }
     out.push(0x3F);                                  // '?'
@@ -524,13 +542,14 @@ async function enviar(bytes){
 
 /* ── los tickets ────────────────────────────────────────────────────────── */
 function ticketPrueba(){
-  const t = Ticket('PC437');
-  t.cmd(CMD.init).cmd(CMD.sinKanji).usarTabla('PC437');
+  const t = Ticket(TABLA);
+  t.cmd(CMD.init).cmd(CMD.sinKanji).usarTabla(TABLA);
   t.cmd(CMD.centro).cmd(CMD.doble).ln("PIRULO'S").cmd(CMD.normal);
   t.ln('PRUEBA DE IMPRESION').cmd(CMD.izq);
   t.sep();
   t.ln('Fecha: ' + new Date().toLocaleString('es-CL'));
   t.ln('Via:   ' + via);
+  t.ln('Tabla: ' + TABLA);
   t.sep();
   t.ln('Texto normal de 48 caracteres de ancho:');
   t.ln('123456789012345678901234567890123456789012345678');
@@ -582,7 +601,7 @@ function ticketComanda(etiqueta){
   /* Formato de comanda del CLAUDE.md, con productos y precios reales de
      data/catalogo.json. El número, la hora y el cliente son de prueba:
      dicen PRUEBA en grande para que nadie lo confunda con un pedido. */
-  const t = Ticket('PC437');
+  const t = Ticket(TABLA);
   const items = [
     { cant:2, nombre:'Sándwich Italiano', precio:4600,
       sub:[], mods:['Churrasco'], notas:['sin tomate'] },
@@ -592,13 +611,16 @@ function ticketComanda(etiqueta){
   ];
   const total = items.reduce((s,i) => s + i.cant * i.precio, 0);
 
-  t.cmd(CMD.init).cmd(CMD.sinKanji).usarTabla('PC437');
+  t.cmd(CMD.init).cmd(CMD.sinKanji).usarTabla(TABLA);
   t.cmd(CMD.centro).cmd(CMD.doble).ln("PIRULO'S").cmd(CMD.normal);
   t.cmd(CMD.negrita(1)).ln('*** ' + (etiqueta || 'COMANDA DE PRUEBA') + ' ***').cmd(CMD.negrita(0));
   t.cmd(CMD.altoDoble).ln('COMANDA #0000').cmd(CMD.normal);
   t.ln(new Date().toLocaleString('es-CL')).cmd(CMD.izq);
   t.sep();
-  t.cmd(CMD.negrita(1)).ln('CLIENTE: Prueba').cmd(CMD.negrita(0));
+  /* Nombre con tilde y con ñ a propósito: es la prueba de que el nombre
+     que escribe un cliente cualquiera sale bien, que es el caso que la
+     tabla hecha a mano no podía cubrir. */
+  t.cmd(CMD.negrita(1)).ln('CLIENTE: Nicolás Muñoz (prueba)').cmd(CMD.negrita(0));
   t.ln('ORIGEN: whatsapp');
   t.sep();
   for (const i of items){
