@@ -37,24 +37,46 @@ Lo vas llenando a medida que avanzas. Al final me pasas lo que anotaste.
 Este bloque es puro requisito. Si algo de acá falla, la prueba no corre y hay que resolverlo
 primero.
 
-### ☐ 2.1 Confirmar que la tablet es Android
+### ☑ 2.1 La tablet — **confirmado el 27/10/2026**
 
-Ajustes → Información del teléfono / Acerca de la tablet.
-
-- Modelo: `______________________`
-- Versión de Android: `______________________`
-
-### ☐ 2.2 Revisar la versión de Chrome — **esto es lo que puede bloquear todo**
-
-Abrir Chrome en la tablet → menú de los tres puntos → **Configuración** → **Acerca de Chrome**.
-
-- Versión de Chrome: `______________________`
-
-| Lo que dice | Qué significa |
+| | |
 |---|---|
-| **138 o más** | ✅ Perfecto, sigue al 2.3 |
-| Menos de 138 | ⚠️ Actualizar desde Play Store ahora, con WiFi. Después volver acá |
-| No se puede actualizar más allá de 137 | 🔴 Pará y avísame. Cambia el plan: hay que irse a USB o a app puente |
+| Equipo | **Honor Pad X9**, modelo **ELN-W09** |
+| Sistema | **Android 13** (MagicOS 7.1) |
+| Chrome | **155.0.8059.81** |
+| USB | Tiene **modo host / OTG**, así que el respaldo por cable es posible |
+
+**Chrome 155 pasa de sobra el mínimo de 138** que exige Web Serial sobre Bluetooth. El bloqueador
+más grande que tenía este proyecto está despejado.
+
+### ☐ 2.2 🔴 Sacarle a MagicOS la costumbre de matar Chrome
+
+**Este paso es nuevo y es específico de esta tablet.** MagicOS cierra apps en segundo plano de
+forma agresiva: si lo deja hacer, la PWA pierde la conexión con Supabase y deja de imprimir sin
+avisar. Funcionaría en la demo y fallaría en el local un martes a las nueve de la noche.
+
+Hay que desactivarlo **en dos lugares distintos**, los dos para Chrome:
+
+**a) Optimización de batería**
+Ajustes → Aplicaciones → (menú `···`) → **Acceso especial** → **Optimización de batería** →
+buscar **Chrome** → elegir **No permitir**.
+
+- ¿Quedó en "No permitir"? `SÍ / NO`
+
+**b) Inicio de aplicaciones**
+Ajustes → **Batería** → **Inicio de aplicaciones** → buscar **Chrome** → desactivar
+**gestionar automáticamente** → en el cuadro que aparece, dejar activado **Ejecutar en segundo
+plano** (y también inicio automático y secundario si los ofrece).
+
+- ¿Quedó en manual con "ejecutar en segundo plano"? `SÍ / NO`
+
+**c) Apagar el ahorro de energía**
+Ajustes → Batería → que **no** esté activo ningún modo de ahorro.
+
+- ¿Quedó apagado? `SÍ / NO`
+
+*Los nombres exactos de los menús pueden variar un poco según la versión de MagicOS. Si alguno no
+lo encontrás tal cual, buscá "batería" en el buscador de Ajustes y decime qué opciones te muestra.*
 
 ### ☐ 2.3 Encender la impresora
 

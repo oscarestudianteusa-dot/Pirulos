@@ -47,6 +47,7 @@ También sirve como carta con QR para clientes dentro del local.
 - **Descartado: RawBT.** Se invoca con un link `rawbt:` y navegar a un esquema externo exige gesto del usuario, así que no sirve para imprimir solo.
 - **La impresión es automática**, no manual: ver `docs/impresion.md`. La regla que lo hace posible es que el navegador pide gesto para *elegir* el dispositivo, no para *escribirle*.
 - La tablet debe quedar **despierta y con la PWA adelante** (`navigator.wakeLock`): con la pantalla apagada Chrome frena los temporizadores y la conexión.
+- ⚠️ **La tablet es una Honor Pad X9 con MagicOS 7.1, y MagicOS mata apps en segundo plano de forma agresiva.** Esto puede cortar la conexión Realtime y la impresión automática sin aviso. Hay que desactivarlo a mano, por app, en dos lugares: *Ajustes → Aplicaciones → Acceso especial → Optimización de batería → Chrome → No permitir*, y *Ajustes → Batería → Inicio de aplicaciones → Chrome → gestionar manualmente* con **Ejecutar en segundo plano** activado. Sin esto, el sistema funciona en la demo y falla en el local un martes a las 9 de la noche.
 - **Implicancia de arquitectura**: la impresión ocurre en la tablet, no en el servidor. La tablet debe estar encendida, con Chrome abierto en la PWA y el permiso USB concedido. El sistema debe tolerar que no lo esté: cola de impresión persistida, reintento manual y alerta visible cuando un pedido no logró imprimirse.
 
 ### WhatsApp
@@ -225,11 +226,11 @@ El diseño exacto se ajusta con Miguel después de ver el primer ticket real.
 Confirmar con Miguel antes o durante la Fase 0:
 
 - [x] ~~Marca y modelo de la impresora~~ → Xprinter XP-N160II, 80mm, USB+Bluetooth
-- [ ] **Confirmar que la tablet es Android** y que tiene Chrome. Versión de Android.
-- [ ] **¿Qué versión de Chrome tiene la tablet?** Hace falta **138 o superior** para Web Serial sobre Bluetooth. Es el requisito que puede bloquear todo.
+- [x] ~~Confirmar que la tablet es Android~~ → **Honor Pad X9, modelo ELN-W09, Android 13 (MagicOS 7.1)**. Confirmado por Pipo, 27/10/2026.
+- [x] ~~¿Qué versión de Chrome tiene la tablet?~~ → **Chrome 155.0.8059.81**. Pasa el mínimo de 138 que exige Web Serial sobre Bluetooth. **Bloqueador despejado.**
+- [x] ~~¿Se conecta con adaptador OTG?~~ → la Pad X9 tiene USB-C con **modo host/OTG**, así que el respaldo por cable es posible con un adaptador USB-C a USB-A. Ojo: Honor avisa que al conectar un periférico la tablet puede pasar a carga inversa.
 - [ ] ¿El Bluetooth de la impresora es SPP clásico, BLE, o los dos? (lo responde la página de prueba)
 - [ ] ¿Loyverse suelta el Bluetooth de la impresora, o lo toma en exclusiva? Probar con Loyverse abierto y cerrado.
-- [ ] Si hay que irse a USB como respaldo: ¿se conecta con adaptador OTG o el puerto es directo?
 - [ ] ¿Qué tabla de caracteres imprime bien las tildes y la ñ? (probar CP850, PC437, WPC1252)
 - [ ] ¿Hay WiFi estable en el local?
 - [ ] ¿Cuántos productos tiene la carta? ¿Hay variantes (tamaños, combos)?
