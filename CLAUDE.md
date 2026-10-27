@@ -34,15 +34,19 @@ También sirve como carta con QR para clientes dentro del local.
 | Buffer de entrada | 96 KB |
 | Extra disponible | Puerto RJ11 para cajón de dinero |
 
-- Se conecta **por cable USB a la tablet** del local.
-- Las Xprinter USB se presentan como **interfaz clase 7 (Printer)** estándar, que WebUSB sí puede reclamar. No está entre las clases protegidas del navegador.
-- **Estrategia adoptada: WebUSB.** El navegador envía comandos ESC/POS crudos directo a la impresora. Sin app puente, sin drivers, sin licencias.
-- Requisitos que impone WebUSB:
+- **Se conecta por Bluetooth a la tablet** del local (confirmado por Pipo, 27/10/2026). Acepta también USB, que queda como respaldo.
+- **Estrategia adoptada: Web Serial sobre Bluetooth RFCOMM (SPP).** Chrome lo soporta en Android **desde la versión 138**, sin flags. El navegador envía comandos ESC/POS crudos directo a la impresora. Sin app puente, sin drivers, sin licencias.
+- Requisitos que impone:
   - **HTTPS obligatorio** (lo cubre Vercel).
-  - **Chrome en Android.** Firefox y Safari no implementan WebUSB. La PWA debe abrirse en Chrome, sí o sí.
-  - El permiso al dispositivo lo otorga el usuario una vez, mediante un gesto explícito. No se puede pedir automáticamente al cargar la página.
-- **Plan B si Loyverse bloquea el puerto USB**: esta impresora acepta USB **y** Bluetooth. Loyverse puede quedarse en Bluetooth y nuestro sistema en USB, sin pelear por la misma interfaz. Verificar que acepte ambos canales activos.
-- **Plan C**: app puente con servidor HTTP local (`github.com/parzibyte/plugin-impresora-termica-bt-android`).
+  - **Chrome en Android 138 o superior.** Firefox y Safari no implementan ninguna de estas APIs.
+  - La impresora debe estar **emparejada antes en los ajustes de Bluetooth de Android**. El navegador usa lo ya emparejado, no empareja él.
+  - El permiso al puerto lo otorga el usuario **una vez**, con un gesto explícito. Después `navigator.serial.getPorts()` lo recupera sin gesto: **eso es lo que permite imprimir solo.**
+- **Plan B**: Web Bluetooth (BLE GATT), si resulta que la impresora es de doble modo y expone una característica escribible. Sin verificar.
+- **Plan C si Loyverse bloquea el Bluetooth**: esta impresora acepta Bluetooth **y** USB. Loyverse se queda con el Bluetooth y nuestro sistema se va al cable, sin pelear por el mismo canal. Verificar que acepte ambos activos.
+- **Plan D**: app puente con servidor HTTP local (`github.com/parzibyte/plugin-impresora-termica-bt-android`). Ojo: desde Chrome 142 las peticiones a la red local pasan por el permiso de Local Network Access.
+- **Descartado: RawBT.** Se invoca con un link `rawbt:` y navegar a un esquema externo exige gesto del usuario, así que no sirve para imprimir solo.
+- **La impresión es automática**, no manual: ver `docs/impresion.md`. La regla que lo hace posible es que el navegador pide gesto para *elegir* el dispositivo, no para *escribirle*.
+- La tablet debe quedar **despierta y con la PWA adelante** (`navigator.wakeLock`): con la pantalla apagada Chrome frena los temporizadores y la conexión.
 - **Implicancia de arquitectura**: la impresión ocurre en la tablet, no en el servidor. La tablet debe estar encendida, con Chrome abierto en la PWA y el permiso USB concedido. El sistema debe tolerar que no lo esté: cola de impresión persistida, reintento manual y alerta visible cuando un pedido no logró imprimirse.
 
 ### WhatsApp
@@ -70,7 +74,7 @@ Explícitamente fuera de alcance:
 - **Deploy**: Vercel (free tier)
 - **Panel de Miguel**: PWA instalable en la tablet, diseñada para touch y pantalla chica
 - **Carta del cliente**: web pública, mobile-first, sin login
-- **Impresión**: WebUSB desde la PWA directo a la impresora (Chrome Android)
+- **Impresión**: Web Serial sobre Bluetooth RFCOMM (SPP) desde la PWA directo a la impresora (Chrome Android 138+). Respaldos: BLE, USB.
 
 Justificación de Supabase sobre alternativas: subscriptions realtime out of the box, Postgres real (importante para las consultas analíticas de la fase 4), y free tier suficiente para el volumen de un local chico.
 
@@ -114,7 +118,7 @@ Cada fase entrega algo que Miguel usa el mismo día. No se avanza a la siguiente
 ### Fase 0 — Reconocimiento (sin código de aplicación)
 - Confirmar todos los PENDIENTES de la sección 8.
 - Fotografiar/anotar la carta completa: productos, precios, modificadores reales que la gente pide.
-- **Prueba de impresión WebUSB**: página mínima que se conecte a la impresora desde Chrome en la tablet y saque un ticket de prueba. **Si esto no funciona, todo lo demás no sirve.** Es el primer entregable técnico y bloquea todo lo demás.
+- **Prueba de impresión**: página mínima que se conecte a la impresora Bluetooth desde Chrome en la tablet, saque un ticket de prueba y **demuestre que puede imprimir sin que nadie toque la tablet**. **Si esto no funciona, todo lo demás no sirve.** Es el primer entregable técnico y bloquea todo lo demás. → `docs/prueba-impresion.html`, instrucciones en `docs/impresion.md`.
 
 ### Fase 1 — Carta digital + comanda impresa
 
@@ -137,7 +141,7 @@ Cada fase entrega algo que Miguel usa el mismo día. No se avanza a la siguiente
 **Paso 1.2 — Recepción y comanda**
 - El pedido se guarda en Supabase con estado `pendiente`.
 - Pantalla de la tablet (PWA, Chrome): lista de pedidos entrantes vía realtime, con alerta sonora.
-- Impresión automática de la comanda vía WebUSB al llegar el pedido.
+- **Impresión automática** de la comanda al llegar el pedido, sin que nadie apriete nada (requisito de Miguel, confirmado 27/10/2026). Sale por Bluetooth SPP. La PWA recupera el permiso del puerto con `getPorts()` al abrir, así que imprime sola también después de un reinicio de la tablet.
 - Cola de impresión persistida: si falla, el pedido queda visible con botón de reimprimir. **Nunca perder un pedido en silencio.**
 
 **Paso 1.3 — Distribución**
@@ -222,8 +226,10 @@ Confirmar con Miguel antes o durante la Fase 0:
 
 - [x] ~~Marca y modelo de la impresora~~ → Xprinter XP-N160II, 80mm, USB+Bluetooth
 - [ ] **Confirmar que la tablet es Android** y que tiene Chrome. Versión de Android.
-- [ ] ¿La impresora se conecta con adaptador OTG o el puerto es directo?
-- [ ] ¿Se puede probar WebUSB con Loyverse abierto, o hay que cerrarlo para liberar el USB?
+- [ ] **¿Qué versión de Chrome tiene la tablet?** Hace falta **138 o superior** para Web Serial sobre Bluetooth. Es el requisito que puede bloquear todo.
+- [ ] ¿El Bluetooth de la impresora es SPP clásico, BLE, o los dos? (lo responde la página de prueba)
+- [ ] ¿Loyverse suelta el Bluetooth de la impresora, o lo toma en exclusiva? Probar con Loyverse abierto y cerrado.
+- [ ] Si hay que irse a USB como respaldo: ¿se conecta con adaptador OTG o el puerto es directo?
 - [ ] ¿Qué tabla de caracteres imprime bien las tildes y la ñ? (probar CP850, PC437, WPC1252)
 - [ ] ¿Hay WiFi estable en el local?
 - [ ] ¿Cuántos productos tiene la carta? ¿Hay variantes (tamaños, combos)?

@@ -43,24 +43,33 @@
   ol,ul{padding-left:22px} li{margin:6px 0}
   code{background:#000; padding:1px 5px; border-radius:4px; font-size:13px}
   .aviso{border-left:3px solid var(--oro); padding-left:12px; color:#E8DCC4}
+  .grande{font-size:19px; font-weight:700; text-align:center; margin:4px 0}
   a{color:var(--oro)}
+  table{width:100%; border-collapse:collapse; font-size:14px; margin:10px 0}
+  td{padding:5px 0; border-bottom:1px solid var(--borde); vertical-align:top}
+  td:first-child{width:38%; color:var(--gris)}
 </style>
 </head>
 <body>
 
 <h1>Prueba de impresión — Pirulo's</h1>
-<p class="sub">Xprinter XP-N160II · 80 mm · WebUSB + ESC/POS</p>
+<p class="sub">Xprinter XP-N160II · 80 mm · Bluetooth o USB · ESC/POS</p>
 
 <div class="caja">
   <p>Estado: <span id="estado" class="esp">sin conectar</span></p>
-  <p id="soporte" class="sub" style="margin:0"></p>
+  <table id="soporte"></table>
 </div>
 
 <h2>1 · Conectar</h2>
-<button id="btn-conectar" class="principal">Conectar impresora
-  <small>Muestra solo dispositivos de clase impresora</small></button>
-<button id="btn-conectar-todo" class="chico">Conectar — mostrar todos los dispositivos
-  <small>Usar si la impresora no aparece en la lista anterior</small></button>
+<p class="sub">La impresora está por Bluetooth, así que empezar por el primer botón.
+Tiene que estar <strong>emparejada antes</strong> en los ajustes de Bluetooth de Android.</p>
+
+<button id="btn-serial" class="principal">Bluetooth (SPP) — recomendado
+  <small>Web Serial sobre RFCOMM. Es el camino que sirve para una térmica Bluetooth</small></button>
+<button id="btn-ble" class="chico">Bluetooth (BLE)
+  <small>Solo si la impresora aparece como dispositivo BLE. Lista sus servicios</small></button>
+<button id="btn-usb" class="chico">USB
+  <small>Plan de respaldo: requiere cambiar el cable a la tablet</small></button>
 
 <h2>2 · Pruebas</h2>
 <button id="btn-ticket" disabled>Ticket de prueba
@@ -72,43 +81,89 @@
 <button id="btn-avanzar" class="chico" disabled>Avanzar papel</button>
 <button id="btn-cortar" class="chico" disabled>Cortar papel</button>
 
-<h2>3 · Diagnóstico</h2>
+<h2>3 · Que imprima sola</h2>
+<p class="sub">Esta es <strong>la prueba que importa</strong>: el pedido llega y la comanda sale sin
+que nadie toque la tablet. Un navegador pide un gesto del usuario para <em>elegir</em> la impresora,
+pero no para <em>escribirle</em> después. Esto lo comprueba.</p>
+
+<button id="btn-auto" disabled>Imprimir sola en 20 segundos
+  <small>Suelta la tablet y no la toques. Si sale el ticket, la impresión automática funciona</small></button>
+<p id="cuenta" class="grande"></p>
+
+<div class="caja">
+  <p style="margin:0"><strong>Prueba del reinicio.</strong> Recargar esta página y mirar el estado
+  de arriba. Si dice <span class="ok">reconectada sola</span> sin que hayas tocado nada, la tablet
+  va a poder imprimir después de un reinicio. Si pide elegir la impresora de nuevo, hay que
+  anotarlo: cambia cómo arranca la PWA.</p>
+</div>
+<button id="btn-pantalla" class="chico">Mantener la pantalla encendida
+  <small>La tablet tiene que estar despierta para recibir pedidos</small></button>
+
+<h2>4 · Diagnóstico</h2>
 <p class="sub">Esto es lo que hay que mandarle a Pipo si algo falla.</p>
 <button id="btn-copiar" class="chico">Copiar diagnóstico</button>
 <pre id="log">—</pre>
 
 <h2>Qué anotar</h2>
 <ul>
-  <li>¿La impresora apareció en la lista al tocar <em>Conectar</em>?</li>
-  <li>¿Salió el ticket de prueba completo y cortó el papel?</li>
+  <li>¿La impresora apareció en la lista del <strong>primer</strong> botón (SPP)?</li>
+  <li>¿Salió el ticket de prueba completo y <strong>cortó el papel</strong>?</li>
   <li><strong>De las tres tablas de caracteres, cuál imprimió bien <em>á é í ó ú ñ</em>.</strong>
       Ese dato define cómo se imprimen las comandas.</li>
+  <li>¿Funcionó la prueba de los 20 segundos sin tocar nada?</li>
+  <li>¿Al recargar dijo «reconectada sola»?</li>
   <li>¿Funcionó con Loyverse abierto? ¿Y con Loyverse cerrado?</li>
-  <li>El <code>vendorId</code> y <code>productId</code> que muestra el diagnóstico.</li>
+  <li>La versión de Chrome, que sale en el diagnóstico. <strong>Hace falta 138 o más</strong>.</li>
 </ul>
 
 <div class="caja aviso">
-  <p><strong>Requisitos</strong>: Chrome en Android (Firefox y Safari no tienen WebUSB),
-  la página abierta por <code>https://</code>, y la impresora conectada por cable USB
-  — con adaptador OTG si la tablet tiene USB-C y el cable es USB-A.</p>
+  <p><strong>Requisitos</strong>: Chrome en Android 138 o superior (Firefox y Safari no tienen
+  ninguna de estas APIs), la página abierta por <code>https://</code>, y la impresora
+  <strong>ya emparejada</strong> en los ajustes de Bluetooth de Android, encendida y con papel.</p>
 </div>
 
 <script>
 /* ──────────────────────────────────────────────────────────────────────────
-   Prueba de impresión WebUSB para la Xprinter XP-N160II.
-   Objetivo: responder tres preguntas antes de escribir una línea de la app.
-     1. ¿Chrome en Android puede reclamar la interfaz USB de esta impresora?
-     2. ¿Qué interfaz y qué endpoint hay que usar?
-     3. ¿Qué tabla de caracteres imprime bien las tildes y la ñ?
+   Prueba de impresión para la Xprinter XP-N160II desde Chrome en Android.
+   La impresora del local está conectada por Bluetooth, y la comanda tiene
+   que imprimirse sola al llegar el pedido. Esta página responde cuatro
+   preguntas antes de escribir una línea de la app:
+
+     1. ¿Se puede hablarle a la impresora Bluetooth desde el navegador?
+        Tres caminos posibles, en orden de preferencia:
+          · Web Serial sobre RFCOMM/SPP  → Chrome 138+ en Android
+          · Web Bluetooth (BLE GATT)     → solo si expone servicios BLE
+          · WebUSB                       → plan de respaldo, con cable
+     2. ¿Se puede escribir SIN gesto del usuario? (impresión automática)
+     3. ¿El permiso sobrevive a recargar la página? (reinicio de la tablet)
+     4. ¿Qué tabla de caracteres imprime bien las tildes y la ñ?
+
    No depende de nada: un archivo, sin librerías.
    ────────────────────────────────────────────────────────────────────────── */
 
 const ANCHO = 48;              // caracteres por línea, 80 mm, fuente A
 const CLASE_IMPRESORA = 7;     // clase USB "Printer"
+const SPP = '00001101-0000-1000-8000-00805f9b34fb';   // Serial Port Profile
 
-let dispositivo = null;
-let interfazNum = null;
-let endpointOut = null;
+/* Servicios BLE que usan las térmicas ESC/POS conocidas. Web Bluetooth
+   obliga a declarar de antemano los servicios a los que se quiere acceder:
+   lo que no esté en esta lista no se puede ni mirar. */
+const SERVICIOS_BLE = [
+  '000018f0-0000-1000-8000-00805f9b34fb',   // el más común (Epson y genéricas)
+  '000018f1-0000-1000-8000-00805f9b34fb',
+  'e7810a71-73ae-499d-8c15-faa9aef0c3f2',   // mapeado a Xprinter en varias librerías
+  '0000ffe0-0000-1000-8000-00805f9b34fb',
+  '0000ff00-0000-1000-8000-00805f9b34fb',
+  '49535343-fe7d-4ae5-8fa9-9fafd205e455',   // UART transparente ISSC / Microchip
+  '0000fee7-0000-1000-8000-00805f9b34fb'
+];
+
+/* Transporte activo. Uno solo a la vez. */
+let via = null;            // 'serial' | 'ble' | 'usb'
+let puertoSerial = null, escritorSerial = null;
+let caracteristicaBle = null, servidorBle = null;
+let dispositivoUsb = null, endpointUsb = null;
+let bloqueoPantalla = null;
 
 /* ── log en pantalla: en la tablet no hay consola a mano ── */
 const elLog = document.getElementById('log');
@@ -216,13 +271,107 @@ function Ticket(nombreTabla){
 }
 
 const pesos = n => '$ ' + n.toLocaleString('es-CL');
+const esperar = ms => new Promise(r => setTimeout(r, ms));
 
-/* ── conexión ───────────────────────────────────────────────────────────── */
-function describir(d){
-  const info = {
+/* ══════════════════════════════════════════════════════════════════════════
+   TRANSPORTE 1 — Web Serial sobre Bluetooth RFCOMM (SPP)
+   El camino bueno para una térmica Bluetooth. Chrome lo soporta en Android
+   desde la versión 138, sin flags. La impresora tiene que estar emparejada
+   antes en los ajustes de Android: el navegador no empareja, solo usa lo
+   que ya está emparejado.
+   ══════════════════════════════════════════════════════════════════════════ */
+async function conectarSerial(){
+  try{
+    if (!('serial' in navigator)) throw new Error('este Chrome no tiene Web Serial');
+    log('pidiendo puerto serie (incluye Bluetooth SPP)…');
+    const puerto = await navigator.serial.requestPort({
+      allowedBluetoothServiceClassIds: [SPP]
+    });
+    await abrirSerial(puerto, false);
+  } catch (e){ fallo(e, 'serial'); }
+}
+
+async function abrirSerial(puerto, reconexion){
+  const info = puerto.getInfo();
+  log('puerto: ' + JSON.stringify(info));
+  if (info.bluetoothServiceClassId)
+    log('es un puerto Bluetooth RFCOMM · servicio ' + info.bluetoothServiceClassId, 'ok');
+
+  /* En Bluetooth el baudRate es decorativo: RFCOMM no tiene velocidad de
+     línea. Pero la API lo exige igual, así que va un valor cualquiera. */
+  await puerto.open({ baudRate: 115200 });
+  puertoSerial = puerto;
+  escritorSerial = puerto.writable.getWriter();
+  via = 'serial';
+  log('puerto abierto · escritor listo', 'ok');
+  estado(reconexion ? 'reconectada sola (Bluetooth SPP)' : 'conectada (Bluetooth SPP)', 'ok');
+  habilitar(true);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TRANSPORTE 2 — Web Bluetooth (BLE GATT)
+   Solo sirve si la impresora expone servicios BLE. Si su Bluetooth es
+   clásico (SPP), no va a aparecer acá: el navegador no tiene acceso a
+   Bluetooth clásico por esta API. Igual vale probarlo, porque esta
+   impresora es de doble modo y nadie lo ha verificado.
+   ══════════════════════════════════════════════════════════════════════════ */
+async function conectarBle(){
+  try{
+    if (!('bluetooth' in navigator)) throw new Error('este Chrome no tiene Web Bluetooth');
+    log('buscando dispositivos BLE…');
+    const disp = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true,
+      optionalServices: SERVICIOS_BLE
+    });
+    log('dispositivo BLE: ' + (disp.name || '(sin nombre)') + ' · id ' + disp.id);
+    await abrirBle(disp, false);
+  } catch (e){ fallo(e, 'ble'); }
+}
+
+async function abrirBle(disp, reconexion){
+  const servidor = await disp.gatt.connect();
+  servidorBle = servidor;
+  log('GATT conectado', 'ok');
+
+  const servicios = await servidor.getPrimaryServices();
+  log('servicios visibles: ' + (servicios.length || 0));
+
+  /* Se recorre todo y se usa la primera característica escribible que
+     aparezca. Hardcodear un par servicio/característica no sirve: cambia
+     según el fabricante y para Xprinter las fuentes no coinciden. */
+  for (const s of servicios){
+    const cs = await s.getCharacteristics();
+    for (const c of cs){
+      const puede = c.properties.write || c.properties.writeWithoutResponse;
+      log('  ' + s.uuid + ' / ' + c.uuid +
+          ' [' + Object.keys(c.properties).filter(k => c.properties[k]).join(',') + ']' +
+          (puede ? '  ← escribible' : ''));
+      if (puede && !caracteristicaBle) caracteristicaBle = c;
+    }
+  }
+  if (!caracteristicaBle) throw new Error('ningún servicio BLE visible tiene característica escribible');
+
+  via = 'ble';
+  log('usando ' + caracteristicaBle.uuid, 'ok');
+  estado(reconexion ? 'reconectada sola (BLE)' : 'conectada (BLE)', 'ok');
+  habilitar(true);
+
+  disp.addEventListener('gattserverdisconnected', () => {
+    log('BLE desconectado', 'mal');
+    if (via === 'ble'){ caracteristicaBle = null; via = null; estado('desconectada','mal'); habilitar(false); }
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TRANSPORTE 3 — WebUSB
+   Plan de respaldo. Queda acá porque está probado y porque esta impresora
+   acepta USB y Bluetooth a la vez: si Loyverse se queda con el Bluetooth,
+   nosotros podemos irnos al cable.
+   ══════════════════════════════════════════════════════════════════════════ */
+function describirUsb(d){
+  return JSON.stringify({
     fabricante: d.manufacturerName || '(sin nombre)',
     producto: d.productName || '(sin nombre)',
-    serie: d.serialNumber || '(sin serie)',
     vendorId: '0x' + d.vendorId.toString(16).padStart(4,'0'),
     productId: '0x' + d.productId.toString(16).padStart(4,'0'),
     configuraciones: d.configurations.map(c => ({
@@ -230,28 +379,24 @@ function describir(d){
       interfaces: c.interfaces.map(i => ({
         numero: i.interfaceNumber,
         alternativas: i.alternates.map(a => ({
-          clase: a.interfaceClass, subclase: a.interfaceSubclass, protocolo: a.interfaceProtocol,
-          endpoints: a.endpoints.map(e =>
-            `#${e.endpointNumber} ${e.direction} ${e.type} ${e.packetSize}b`)
+          clase: a.interfaceClass, subclase: a.interfaceSubclass,
+          endpoints: a.endpoints.map(e => `#${e.endpointNumber} ${e.direction} ${e.type} ${e.packetSize}b`)
         }))
       }))
     }))
-  };
-  return JSON.stringify(info, null, 2);
+  }, null, 2);
 }
 
-/* Busca la interfaz y el endpoint a usar. No se hardcodea interfaz 0 /
-   endpoint 1: hay modelos que exponen varias y la que sirve no siempre es
-   la primera. Se prefiere la de clase 7 (Printer) con un bulk OUT. */
-function candidatos(d){
+/* No se hardcodea interfaz 0 / endpoint 1: hay modelos que exponen varias
+   y la que sirve no siempre es la primera. Se prefiere clase 7 (Printer). */
+function candidatosUsb(d){
   const lista = [];
   for (const intf of d.configuration.interfaces){
     for (const alt of intf.alternates){
       const out = alt.endpoints.find(e => e.direction === 'out' && e.type === 'bulk');
       if (!out) continue;
       lista.push({
-        interfaz: intf.interfaceNumber,
-        endpoint: out.endpointNumber,
+        interfaz: intf.interfaceNumber, endpoint: out.endpointNumber,
         clase: alt.interfaceClass,
         prioridad: alt.interfaceClass === CLASE_IMPRESORA ? 0 : 1
       });
@@ -260,99 +405,109 @@ function candidatos(d){
   return lista.sort((a,b) => a.prioridad - b.prioridad);
 }
 
-async function usar(d){
-  dispositivo = d;
-  log('dispositivo: ' + (d.productName || '(sin nombre)') +
+async function conectarUsb(){
+  try{
+    if (!('usb' in navigator)) throw new Error('este Chrome no tiene WebUSB');
+    log('pidiendo dispositivo USB…');
+    const d = await navigator.usb.requestDevice({ filters: [] });
+    await abrirUsb(d, false);
+  } catch (e){ fallo(e, 'usb'); }
+}
+
+async function abrirUsb(d, reconexion){
+  log('dispositivo USB: ' + (d.productName || '(sin nombre)') +
       ' · vendorId 0x' + d.vendorId.toString(16).padStart(4,'0') +
       ' · productId 0x' + d.productId.toString(16).padStart(4,'0'), 'ok');
-
   await d.open();
-  log('open() ok', 'ok');
-
   if (!d.configuration) await d.selectConfiguration(1);
-  log('configuración ' + d.configuration.configurationValue + ' seleccionada', 'ok');
+  log('descriptores:\n' + describirUsb(d));
 
-  log('descriptores:\n' + describir(d));
+  const opciones = candidatosUsb(d);
+  if (!opciones.length) throw new Error('no expone ningún endpoint bulk OUT');
 
-  const opciones = candidatos(d);
-  if (!opciones.length) throw new Error('la impresora no expone ningún endpoint bulk OUT');
-  log('candidatos: ' + opciones.map(o => `interfaz ${o.interfaz}/endpoint ${o.endpoint} (clase ${o.clase})`).join(', '));
-
-  let ultimoError = null;
+  let ultimo = null;
   for (const o of opciones){
-    try {
+    try{
       await d.claimInterface(o.interfaz);
-      interfazNum = o.interfaz;
-      endpointOut = o.endpoint;
+      dispositivoUsb = d; endpointUsb = o.endpoint; via = 'usb';
       log('claimInterface(' + o.interfaz + ') ok · endpoint ' + o.endpoint, 'ok');
       break;
     } catch (e){
-      ultimoError = e;
+      ultimo = e;
       log('claimInterface(' + o.interfaz + ') falló: ' + e.message, 'mal');
     }
   }
-  if (interfazNum === null) throw ultimoError || new Error('no se pudo reclamar ninguna interfaz');
+  if (via !== 'usb') throw ultimo || new Error('no se pudo reclamar ninguna interfaz');
 
-  estado('conectada', 'ok');
+  estado(reconexion ? 'reconectada sola (USB)' : 'conectada (USB)', 'ok');
   habilitar(true);
 }
 
-async function conectar(soloImpresoras){
-  try{
-    log('pidiendo dispositivo' + (soloImpresoras ? ' (clase impresora)' : ' (todos)') + '…');
-    const d = await navigator.usb.requestDevice({
-      filters: soloImpresoras ? [{ classCode: CLASE_IMPRESORA }] : []
-    });
-    await usar(d);
-  } catch (e){
-    if (e.name === 'NotFoundError'){
-      log('no se eligió ningún dispositivo' +
-          (soloImpresoras ? ' — si la lista salió vacía, probar el botón de abajo' : ''), 'mal');
-    } else {
-      log('error al conectar: ' + e.name + ' — ' + e.message, 'mal');
-      explicar(e);
-    }
+/* ── errores con pista en castellano ───────────────────────────────────── */
+function fallo(e, donde){
+  if (e.name === 'NotFoundError'){
+    log('no se eligió ningún dispositivo' +
+        (donde === 'serial' ? ' — si la lista salió vacía, la impresora no está emparejada en Android o este Chrome es anterior al 138' : ''), 'mal');
     estado('sin conectar', 'mal');
+    return;
   }
-}
-
-function explicar(e){
+  log('error (' + donde + '): ' + e.name + ' — ' + e.message, 'mal');
   const m = (e.message || '') + ' ' + (e.name || '');
   if (/denied|security/i.test(m))
-    log('pista: otra app tiene tomada la interfaz USB. Cerrar Loyverse y cualquier ' +
-        'servicio de impresión (RawBT) y volver a probar.', 'mal');
-  if (/busy|in use/i.test(m))
-    log('pista: el dispositivo está ocupado. Desconectar y reconectar el cable USB.', 'mal');
-  if (/transfer|stall/i.test(m))
-    log('pista: la transferencia se rechazó. Revisar que haya papel y que la tapa esté cerrada.', 'mal');
+    log('pista: otra app tiene tomada la impresora. Cerrar Loyverse y cualquier print service ' +
+        '(RawBT) y volver a probar.', 'mal');
+  if (/busy|in use|already open/i.test(m))
+    log('pista: el puerto está ocupado. Cerrar Loyverse, o apagar y prender la impresora.', 'mal');
+  if (/not paired|no se encontr/i.test(m))
+    log('pista: emparejar la impresora primero en Ajustes → Bluetooth de Android.', 'mal');
+  if (/transfer|stall|network/i.test(m))
+    log('pista: la escritura se rechazó. Revisar papel y que la tapa esté cerrada.', 'mal');
+  estado('sin conectar', 'mal');
 }
 
-/* ── envío ──────────────────────────────────────────────────────────────── */
-const TROZO = 4096;   // los transferOut grandes fallan en algunos Android
+/* ══════════════════════════════════════════════════════════════════════════
+   ENVÍO — una sola puerta para los tres transportes.
+   Los trozos chicos no son capricho: por RFCOMM y por BLE, mandar todo de
+   golpe hace que la impresora pierda bytes y salga media comanda.
+   ══════════════════════════════════════════════════════════════════════════ */
+const TROZO = { serial: 512, ble: 100, usb: 4096 };
 
 async function enviar(bytes){
-  if (!dispositivo || endpointOut === null){ log('no hay impresora conectada', 'mal'); return; }
+  if (!via){ log('no hay impresora conectada', 'mal'); return false; }
+  const n = TROZO[via];
   try{
-    for (let i = 0; i < bytes.length; i += TROZO){
-      const parte = bytes.slice(i, i + TROZO);
-      const r = await dispositivo.transferOut(endpointOut, parte);
-      if (r.status !== 'ok') throw new Error('transferOut devolvió ' + r.status);
+    for (let i = 0; i < bytes.length; i += n){
+      const parte = bytes.slice(i, i + n);
+      if (via === 'serial'){
+        await escritorSerial.write(parte);
+      } else if (via === 'ble'){
+        if (caracteristicaBle.properties.writeWithoutResponse)
+          await caracteristicaBle.writeValueWithoutResponse(parte);
+        else
+          await caracteristicaBle.writeValue(parte);
+        await esperar(20);        // BLE necesita respirar entre paquetes
+      } else {
+        const r = await dispositivoUsb.transferOut(endpointUsb, parte);
+        if (r.status !== 'ok') throw new Error('transferOut devolvió ' + r.status);
+      }
     }
-    log('enviados ' + bytes.length + ' bytes', 'ok');
+    log('enviados ' + bytes.length + ' bytes por ' + via, 'ok');
+    return true;
   } catch (e){
-    log('error al imprimir: ' + e.name + ' — ' + e.message, 'mal');
-    explicar(e);
+    fallo(e, via);
+    return false;
   }
 }
 
 /* ── los tickets ────────────────────────────────────────────────────────── */
 function ticketPrueba(){
   const t = Ticket('PC437');
-  t.cmd(CMD.init).cmd(CMD.tabla(TABLAS.PC437.esc_t));
+  t.cmd(CMD.init).usarTabla('PC437');
   t.cmd(CMD.centro).cmd(CMD.doble).ln("PIRULO'S").cmd(CMD.normal);
   t.ln('PRUEBA DE IMPRESION').cmd(CMD.izq);
   t.sep();
   t.ln('Fecha: ' + new Date().toLocaleString('es-CL'));
+  t.ln('Via:   ' + via);
   t.sep();
   t.ln('Texto normal de 48 caracteres de ancho:');
   t.ln('123456789012345678901234567890123456789012345678');
@@ -367,7 +522,7 @@ function ticketPrueba(){
   t.par('Columna izquierda', 'derecha');
   t.par('Un nombre de producto muy largo que no cabe en la linea', '$ 99.999');
   t.sep('=');
-  t.cmd(CMD.centro).ln('Si llegaste hasta aca y corto el papel,').ln('WebUSB funciona.').cmd(CMD.izq);
+  t.cmd(CMD.centro).ln('Si llegaste hasta aca y corto el papel,').ln('el camino funciona.').cmd(CMD.izq);
   t.cmd(CMD.avanzar(4)).cmd(CMD.cortar);
   return t.bytes();
 }
@@ -397,7 +552,7 @@ function ticketTildes(){
   return t.bytes();
 }
 
-function ticketComanda(){
+function ticketComanda(etiqueta){
   /* Formato de comanda del CLAUDE.md, con productos y precios reales de
      data/catalogo.json. El número, la hora y el cliente son de prueba:
      dicen PRUEBA en grande para que nadie lo confunda con un pedido. */
@@ -411,9 +566,9 @@ function ticketComanda(){
   ];
   const total = items.reduce((s,i) => s + i.cant * i.precio, 0);
 
-  t.cmd(CMD.init).cmd(CMD.tabla(TABLAS.PC437.esc_t));
+  t.cmd(CMD.init).usarTabla('PC437');
   t.cmd(CMD.centro).cmd(CMD.doble).ln("PIRULO'S").cmd(CMD.normal);
-  t.cmd(CMD.negrita(1)).ln('*** COMANDA DE PRUEBA ***').cmd(CMD.negrita(0));
+  t.cmd(CMD.negrita(1)).ln('*** ' + (etiqueta || 'COMANDA DE PRUEBA') + ' ***').cmd(CMD.negrita(0));
   t.cmd(CMD.altoDoble).ln('COMANDA #0000').cmd(CMD.normal);
   t.ln(new Date().toLocaleString('es-CL')).cmd(CMD.izq);
   t.sep();
@@ -434,19 +589,60 @@ function ticketComanda(){
   return t.bytes();
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   LA PRUEBA QUE IMPORTA — imprimir sin gesto del usuario.
+   Un navegador exige un gesto para ELEGIR la impresora, pero no para
+   escribirle después. Si esto funciona, la PWA puede imprimir la comanda
+   sola cuando Supabase le avise que entró un pedido.
+   ══════════════════════════════════════════════════════════════════════════ */
+async function pruebaAutomatica(){
+  const el = document.getElementById('cuenta');
+  document.getElementById('btn-auto').disabled = true;
+  log('impresión automática: arranca la cuenta de 20 s — no toques nada', 'ok');
+
+  for (let s = 20; s > 0; s--){
+    el.textContent = 'Imprime sola en ' + s + ' s — no toques la tablet';
+    await esperar(1000);
+  }
+  el.textContent = 'Imprimiendo…';
+
+  /* Ningún click, ningún toque: esta escritura sale de un temporizador.
+     Es exactamente la misma situación que un pedido llegando por Realtime. */
+  const ok = await enviar(ticketComanda('IMPRESION AUTOMATICA'));
+  el.textContent = ok ? '✓ imprimió sola' : '✗ no imprimió';
+  el.className = 'grande ' + (ok ? 'ok' : 'mal');
+  log(ok ? 'imprimió sola, sin ningún toque: la impresión automática funciona'
+         : 'no imprimió sola — revisar el diagnóstico', ok ? 'ok' : 'mal');
+  document.getElementById('btn-auto').disabled = false;
+}
+
 /* ── arranque y botones ─────────────────────────────────────────────────── */
 function habilitar(si){
-  for (const id of ['btn-ticket','btn-tildes','btn-comanda','btn-avanzar','btn-cortar'])
+  for (const id of ['btn-ticket','btn-tildes','btn-comanda','btn-avanzar','btn-cortar','btn-auto'])
     document.getElementById(id).disabled = !si;
 }
 
-document.getElementById('btn-conectar').onclick      = () => conectar(true);
-document.getElementById('btn-conectar-todo').onclick = () => conectar(false);
-document.getElementById('btn-ticket').onclick   = () => enviar(ticketPrueba());
-document.getElementById('btn-tildes').onclick   = () => enviar(ticketTildes());
-document.getElementById('btn-comanda').onclick  = () => enviar(ticketComanda());
-document.getElementById('btn-avanzar').onclick  = () => enviar(new Uint8Array(CMD.avanzar(5)));
-document.getElementById('btn-cortar').onclick   = () => enviar(new Uint8Array(CMD.cortar));
+document.getElementById('btn-serial').onclick  = conectarSerial;
+document.getElementById('btn-ble').onclick     = conectarBle;
+document.getElementById('btn-usb').onclick     = conectarUsb;
+document.getElementById('btn-ticket').onclick  = () => enviar(ticketPrueba());
+document.getElementById('btn-tildes').onclick  = () => enviar(ticketTildes());
+document.getElementById('btn-comanda').onclick = () => enviar(ticketComanda());
+document.getElementById('btn-avanzar').onclick = () => enviar(new Uint8Array(CMD.avanzar(5)));
+document.getElementById('btn-cortar').onclick  = () => enviar(new Uint8Array(CMD.cortar));
+document.getElementById('btn-auto').onclick    = pruebaAutomatica;
+
+/* La tablet tiene que estar despierta para recibir pedidos: si Android
+   apaga la pantalla, Chrome frena los temporizadores y la conexión en
+   segundo plano. En la PWA esto va a estar siempre activo. */
+document.getElementById('btn-pantalla').onclick = async () => {
+  try{
+    if (!('wakeLock' in navigator)) throw new Error('este Chrome no tiene Wake Lock');
+    bloqueoPantalla = await navigator.wakeLock.request('screen');
+    log('pantalla bloqueada, no se va a apagar', 'ok');
+    bloqueoPantalla.addEventListener('release', () => log('se liberó el bloqueo de pantalla'));
+  } catch (e){ log('no se pudo mantener la pantalla encendida: ' + e.message, 'mal'); }
+};
 
 document.getElementById('btn-copiar').onclick = async () => {
   const texto = [
@@ -454,6 +650,9 @@ document.getElementById('btn-copiar').onclick = async () => {
     new Date().toISOString(),
     'navegador: ' + navigator.userAgent,
     'contexto seguro: ' + window.isSecureContext,
+    'APIs: serial=' + ('serial' in navigator) +
+      ' bluetooth=' + ('bluetooth' in navigator) +
+      ' usb=' + ('usb' in navigator),
     'url: ' + location.href,
     '',
     lineas.join('\n')
@@ -466,48 +665,61 @@ document.getElementById('btn-copiar').onclick = async () => {
   }
 };
 
-/* El permiso USB se concede una vez y queda guardado para este sitio.
-   Al volver a abrir la página, el dispositivo ya autorizado se reconecta
-   sin pedir nada. En la app esto es lo que permite que la tablet imprima
-   sola después de un reinicio: el permiso sobrevive, no hay que tocar nada. */
+/* El permiso se concede una vez y queda guardado para este sitio. Al volver
+   a abrir la página, el dispositivo ya autorizado se reconecta sin pedir
+   nada. En la app esto es lo que permite que la tablet imprima sola después
+   de un reinicio: el permiso sobrevive, no hay que tocar nada. */
 (async function arranque(){
-  const sop = document.getElementById('soporte');
-  if (!('usb' in navigator)){
-    sop.innerHTML = '<span class="mal">Este navegador no tiene WebUSB.</span> ' +
-      'Hay que abrir esta página en <strong>Chrome para Android</strong>. ' +
-      'Firefox y Safari no la soportan.';
-    log('navigator.usb no existe — navegador sin WebUSB', 'mal');
-    log('navegador: ' + navigator.userAgent);
-    document.getElementById('btn-conectar').disabled = true;
-    document.getElementById('btn-conectar-todo').disabled = true;
-    return;
-  }
-  if (!window.isSecureContext){
-    sop.innerHTML = '<span class="mal">La página no está en un contexto seguro.</span> ' +
-      'WebUSB exige <code>https://</code> o <code>localhost</code>.';
-    log('isSecureContext = false — WebUSB no va a funcionar acá', 'mal');
-  } else {
-    sop.textContent = 'WebUSB disponible.';
-    log('WebUSB disponible · ' + navigator.userAgent);
-  }
+  /* Tabla de soporte: deja por escrito qué APIs tiene este Chrome, que es
+     la primera cosa a revisar si algo no aparece. */
+  const filas = [
+    ['Web Serial (Bluetooth SPP)', 'serial' in navigator],
+    ['Web Bluetooth (BLE)', 'bluetooth' in navigator],
+    ['WebUSB', 'usb' in navigator],
+    ['Contexto seguro (https)', window.isSecureContext]
+  ];
+  document.getElementById('soporte').innerHTML = filas.map(([n, si]) =>
+    '<tr><td>' + n + '</td><td class="' + (si ? 'ok' : 'mal') + '">' +
+    (si ? 'disponible' : 'NO disponible') + '</td></tr>').join('');
 
-  navigator.usb.addEventListener('disconnect', ev => {
-    if (ev.device === dispositivo){
-      log('la impresora se desconectó', 'mal');
-      dispositivo = null; interfazNum = null; endpointOut = null;
-      estado('desconectada', 'mal');
-      habilitar(false);
-    }
-  });
+  log('navegador: ' + navigator.userAgent);
+  log('APIs · serial=' + ('serial' in navigator) +
+      ' bluetooth=' + ('bluetooth' in navigator) +
+      ' usb=' + ('usb' in navigator) +
+      ' · seguro=' + window.isSecureContext);
 
+  if (!window.isSecureContext)
+    log('isSecureContext = false — ninguna de estas APIs va a funcionar acá. ' +
+        'Hay que abrir la página por https://', 'mal');
+  if (!('serial' in navigator))
+    log('sin Web Serial: o no es Chrome, o es anterior al 138. El Bluetooth SPP ' +
+        'necesita Chrome 138 o superior en Android.', 'mal');
+
+  for (const id of ['btn-serial','btn-ble','btn-usb'])
+    document.getElementById(id).disabled = !window.isSecureContext;
+
+  /* Reconexión sin gesto. Esto es la prueba del reinicio de la tablet. */
   try{
-    const previos = await navigator.usb.getDevices();
-    if (previos.length){
-      log('hay ' + previos.length + ' dispositivo(s) ya autorizado(s), reconectando…');
-      await usar(previos[0]);
+    if ('serial' in navigator){
+      const puertos = await navigator.serial.getPorts();
+      if (puertos.length){
+        log('hay ' + puertos.length + ' puerto(s) ya autorizado(s), reconectando sin tocar nada…');
+        await abrirSerial(puertos[0], true);
+        return;
+      }
     }
+    if ('usb' in navigator){
+      const previos = await navigator.usb.getDevices();
+      if (previos.length){
+        log('hay ' + previos.length + ' dispositivo(s) USB ya autorizado(s), reconectando…');
+        await abrirUsb(previos[0], true);
+        return;
+      }
+    }
+    log('no hay dispositivos autorizados todavía: hay que elegir la impresora una vez');
   } catch (e){
-    log('no se pudo reconectar el dispositivo guardado: ' + e.message, 'mal');
+    log('no se pudo reconectar el dispositivo guardado: ' + e.name + ' — ' + e.message, 'mal');
+    estado('sin conectar', 'mal');
   }
 })();
 </script>

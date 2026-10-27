@@ -11,7 +11,7 @@ Ver [CLAUDE.md](CLAUDE.md) para el contexto completo, las restricciones técnica
 |---|---|
 | Catálogo digitalizado | ✅ 8 categorías, 90 productos |
 | Prototipo visual de la carta | ✅ navegable |
-| Impresión WebUSB | 🟡 página de prueba lista — **falta probarla en la tablet** |
+| Impresión por Bluetooth | 🟡 página de prueba lista — **falta probarla en la tablet** |
 | Carta real (Next.js + Supabase) | ⬜ no empezada |
 | Pantalla de comandas en la tablet | ⬜ no empezada |
 
@@ -29,8 +29,9 @@ docs/mockup/carta.html Prototipo navegable de la carta del cliente.
 docs/impresion.md      Cómo llega un pedido de WhatsApp al papel: el flujo completo,
                        qué se descartó y por qué, y los pasos de la prueba en la tablet.
 docs/prueba-impresion.html
-                       La prueba de impresión WebUSB. Se abre en Chrome en la tablet,
-                       con la impresora enchufada por USB.
+                       La prueba de impresión. Se abre en Chrome en la tablet, con la
+                       impresora ya emparejada por Bluetooth. Prueba los tres caminos
+                       (Bluetooth SPP, BLE, USB) y que imprima sola.
 Fotos Carta/           Las 11 fotos de la carta física de las que salió todo.
 ```
 
@@ -42,11 +43,13 @@ Publicado: **https://oscarestudianteusa-dot.github.io/Pirulos/**
 
 ## Probar la impresora
 
-Desde **Chrome en la tablet** del local, con la impresora conectada por USB:
+Desde **Chrome en la tablet** del local, con la impresora **ya emparejada por Bluetooth** en los
+ajustes de Android:
 
 **https://oscarestudianteusa-dot.github.io/Pirulos/prueba-impresion.html**
 
-Tiene que ser Chrome en Android y tiene que ser por `https://`: WebUSB no funciona de otra forma.
+Tiene que ser **Chrome en Android 138 o superior** y tiene que ser por `https://`. Ninguna de las
+APIs de impresión funciona de otra forma.
 
 ## Reglas importantes
 
