@@ -228,9 +228,17 @@ function aBytes(texto, nombreTabla){
 }
 
 /* ── comandos ESC/POS ── */
-const ESC = 0x1B, GS = 0x1D;
+const ESC = 0x1B, GS = 0x1D, FS = 0x1C;
 const CMD = {
   init:      [ESC, 0x40],
+  /* Cancela el modo de caracteres de doble byte (kanji / GB chino).
+     Esta impresora viene con ese modo ACTIVO de fábrica, y mientras lo
+     esté no mira la tabla de caracteres: toma el byte de la 'á' como
+     inicio de un carácter chino y se come el byte siguiente. Por eso
+     "Sándwich" salía como "S爅dwich", con la 'n' desaparecida.
+     Verificado en papel el 27/10/2026: sin esto, ninguna tabla funciona. */
+  sinKanji:  [FS, 0x2E],
+  conKanji:  [FS, 0x26],
   tabla:     n => [ESC, 0x74, n],
   izq:       [ESC, 0x61, 0],
   centro:    [ESC, 0x61, 1],
@@ -517,7 +525,7 @@ async function enviar(bytes){
 /* ── los tickets ────────────────────────────────────────────────────────── */
 function ticketPrueba(){
   const t = Ticket('PC437');
-  t.cmd(CMD.init).usarTabla('PC437');
+  t.cmd(CMD.init).cmd(CMD.sinKanji).usarTabla('PC437');
   t.cmd(CMD.centro).cmd(CMD.doble).ln("PIRULO'S").cmd(CMD.normal);
   t.ln('PRUEBA DE IMPRESION').cmd(CMD.izq);
   t.sep();
@@ -551,14 +559,17 @@ function ticketTildes(){
   const reales  = 'Sándwich Italiano · Alemán · Dinámico · Camarón · Mandarín · Champiñón · Ají';
 
   const t = Ticket('PC437');
-  t.cmd(CMD.init).usarTabla('PC437');
+  t.cmd(CMD.init).cmd(CMD.sinKanji).usarTabla('PC437');
   t.cmd(CMD.centro).cmd(CMD.doble).ln("PIRULO'S").cmd(CMD.normal);
-  t.ln('TABLAS DE CARACTERES').cmd(CMD.izq);
+  t.ln('TABLAS DE CARACTERES').ln('modo kanji CANCELADO (FS .)').cmd(CMD.izq);
 
   for (const nombre of ['PC437','CP850','WPC1252']){
     t.sep();
     t.cmd(CMD.negrita(1)).ln(nombre + '   (ESC t ' + TABLAS[nombre].esc_t + ')').cmd(CMD.negrita(0));
-    t.usarTabla(nombre).ln(muestra).ln(reales);
+    /* El FS . se repite en cada bloque a propósito: si el ESC t lo
+       reactivara en algún firmware, lo veríamos en un bloque y no en
+       todos, que es justo lo que hace falta para distinguirlo. */
+    t.cmd(CMD.sinKanji).usarTabla(nombre).ln(muestra).ln(reales);
   }
 
   t.usarTabla('PC437').sep('=');
@@ -581,7 +592,7 @@ function ticketComanda(etiqueta){
   ];
   const total = items.reduce((s,i) => s + i.cant * i.precio, 0);
 
-  t.cmd(CMD.init).usarTabla('PC437');
+  t.cmd(CMD.init).cmd(CMD.sinKanji).usarTabla('PC437');
   t.cmd(CMD.centro).cmd(CMD.doble).ln("PIRULO'S").cmd(CMD.normal);
   t.cmd(CMD.negrita(1)).ln('*** ' + (etiqueta || 'COMANDA DE PRUEBA') + ' ***').cmd(CMD.negrita(0));
   t.cmd(CMD.altoDoble).ln('COMANDA #0000').cmd(CMD.normal);
