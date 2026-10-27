@@ -11,22 +11,20 @@ El *por qué* de cada cosa está en [impresion.md](impresion.md). Acá va solo e
 
 # PARTE 1 — Antes de tocar la tablet (5 minutos, en el computador)
 
-### ☐ 1.1 Instalar Node.js
+### ☑ 1.1 Instalar Node.js — **hecho el 27/10/2026**
 
-No está instalado y la Fase 1 no arranca sin él. Hazlo ahora que estás en el PC, porque es lo
-único que bloquea que yo empiece a escribir código de la carta.
+Instalado con `winget install OpenJS.NodeJS.LTS` (el MSI oficial de nodejs.org, con hash
+verificado).
 
-- Bajar la versión **LTS** de https://nodejs.org
-- Instalar con las opciones por defecto
-- **Cerrar y volver a abrir Claude Code** (si no, no ve el `node` nuevo)
+- **Node v24.22.1** · **npm 11.19.1** · en `C:\Program Files\nodejs`
+- Quedó en el PATH de la máquina, así que cualquier terminal nuevo lo ve.
 
-Verificación — pégame la salida de esto:
+⚠️ **Falta una cosa: reiniciar Claude Code.** La sesión que estaba abierta durante la instalación
+sigue con el PATH viejo y no ve el `node` nuevo. Cerrar y volver a abrir, y después comprobar:
 
 ```bash
 node --version && npm --version
 ```
-
-Resultado: `______________________`
 
 ### ☐ 1.2 Dejar este archivo abierto
 
@@ -208,7 +206,7 @@ mensaje exacto. **Es lo más útil de todo**: con eso puedo diagnosticar sin est
 
 1. **El resultado de la Parte 3.** Sobre todo 3.6 y 3.7. Hasta no saber si imprime sola, cualquier
    código que escriba puede ser al tarro.
-2. **Node.js instalado** (paso 1.1).
+2. ~~Node.js instalado~~ → ✅ listo (v24.22.1). Solo falta reiniciar Claude Code una vez.
 
 ### 🟠 Bloquea la Fase 1 — tú, cuando quieras
 
