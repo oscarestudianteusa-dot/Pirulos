@@ -8,10 +8,80 @@ Lo que falta no impide construir la carta — son datos que solo Miguel tiene.
 
 ---
 
+# A0. RESPUESTAS DE MIGUEL — 27/10/2026
+
+*Primera ronda de respuestas directas. Lo que sigue en la sección A es el checklist original;
+varias de esas preguntas ya están respondidas acá y quedan marcadas al final.*
+
+### ✅ Los tres lomitos caros son un error de Loyverse (pregunta nueva, salió del contraste)
+Miguel confirma: **el precio no cambia según la proteína, punto.** Lomito Italiano ($5.000),
+Lomito Chacarero ($5.700) y Lomito Ita/Luco ($4.700) están **mal cargados en Loyverse**: deben
+valer lo mismo que churrasco, pollo y hamburguesa.
+→ El catálogo queda como estaba (estaba bien). La proteína sigue siendo **modificador obligatorio
+sin costo**.
+→ **Pendiente para Miguel: corregirlos en Loyverse.** Hoy está cobrando $900 de más por cada
+Lomito Chacarero y $300 de menos por cada Lomito Ita/Luco.
+
+### ✅ A-2 · La Gringa
+**Cheddar - tocino - barbecue.** Aplicado a Gringa Mediana y Gringa Grande.
+
+### ✅ A-3 · La Suprema
+**Cheddar - tomate - carne - cebollín.** Aplicado a las dos. *(Mi deducción desde la foto decía
+solo cheddar y cebollín: faltaban el tomate y la carne. Por eso no se inventan descripciones.)*
+
+### ✅ A-4 · La Suprema Italiana
+**Tomate - palta - mayo - carne.** Aplicado a las dos.
+
+### ✅ A-7 · El Chemilico va en todas las proteínas
+No es solo de churrasco. Se le quitó "Churrasco" a la descripción, que ahora dice
+*"Cebolla caramelizada - huevo frito"*, y la proteína se elige como en los demás.
+
+### ✅ A-11 · El agua
+**Hay con gas y sin gas.** Queda como elección obligatoria sin costo, igual que la proteína.
+
+### ✅ A-1 · Los sabores de bebida — resuelto, pero no como esperábamos
+Miguel dice que **"están en inventario"**. Lo verifiqué en Loyverse: no hay ni un sabor cargado,
+ni variantes, ni seguimiento de inventario activo. O sea que se refiere a la **bodega física**:
+los sabores son los que haya ese día.
+
+→ **Consecuencia de diseño: la lista de sabores no se hardcodea.** La carta lleva una lista que
+Miguel marca disponible / no disponible, usando el campo `disponible` que el modelo de datos ya
+tiene. Deja de ser un bloqueante para construir: solo hay que cargar la lista una vez antes de
+publicar.
+
+### ✅ Las bebidas grandes son CCU, no Coca-Cola
+Los formatos de 1,5 lt y 3 lt son de la línea **CCU**. En Loyverse el artículo se llama "COCA 1.5",
+pero es solo el nombre interno.
+→ **No nombrar marcas de la competencia en la carta.** Nuestro catálogo ya usa nombres genéricos
+("Desechable 1,5 lt"), así que no hubo que cambiar nada.
+
+### ✅ A-10 · Las empanaditas se piden en promo
+"Casi siempre se piden las empanaditas en promo", o sea **por cinco**. Loyverse las tiene también
+sueltas ($700 la de queso, $300 el nugget), pero es marginal.
+→ La carta muestra **los packs**, como ya está. Las unidades sueltas no entran por ahora.
+
+### ⚠️ "Ingrediente extra" es un precio que decide el chef
+El artículo de Loyverse llamado *Ingrediente extra*, con precio variable, es **un monto que se
+aplica según lo que pidan**, a criterio de quien cocina.
+
+→ **Esto no puede existir en la carta digital**: el cliente no puede elegir un precio variable.
+La carta ofrece los extras con precio fijo (palta, queso, champiñón, tocino, cheddar, carne…), y
+cualquier cosa fuera de esa lista va en el campo de **notas** del pedido y se cobra al retirar.
+Hay que decírselo a Miguel así, para que nadie espere que la carta lo cobre sola.
+
+### ✅ El WhatsApp del local es Business
+→ El mensaje de bienvenida automático con el link a la carta **es viable tal como está planeado**:
+cero código, cero costo, cero riesgo.
+
+---
+
 # A. PREGUNTAS PARA MIGUEL
 
 *Checklist para llevar al local. Ninguna de estas bloquea el desarrollo, pero todas tienen que
 estar respondidas antes de publicar la carta.*
+
+> **Estado al 27/10/2026**: respondidas la 1, 2, 3, 4, 7, 10 y 11 (ver sección A0 arriba).
+> Siguen abiertas la 5, 6, 8, 9, 12, 13, 14 y 15.
 
 ### 🔴 Impiden publicar
 

@@ -1,5 +1,24 @@
 # Preguntas para Miguel
 
+> **Primera ronda respondida el 27/10/2026.** Las respuestas están en `DUDAS.md`, sección A0, y ya
+> se aplicaron al catálogo. **Quedaron sin responder las de abajo** — son las que hay que volver a
+> preguntar:
+>
+> | # | Quedó pendiente | Por qué importa |
+> |---|---|---|
+> | 2 | **¿Qué le sacan a los sándwiches?** (sin tomate, sin mayo) | Es la mitad que falta de los modificadores. Sin esto la carta no puede ofrecer quitar ingredientes |
+> | 3 | **Confirmar los precios de los extras** | Salieron de Loyverse, no de su boca. Si alguno subió, cobramos de menos |
+> | 4 | **¿Todos los sándwiches van en hamburguesa? ¿Y en As?** | Define si la carta tiene 2 hamburguesas o 24 |
+> | 5 | **¿Café, té, los dos arrollados nuevos, la promo «3 Tomate Mayo», Cheese Burger y Tapa Arterias se venden hoy?** | Son productos que existen en Loyverse y no en la carta |
+> | 9 | Palitos de mozzarella (¿cuántos?), Chorrillana (¿solo grande?), nombres mal escritos | Detalles de la carta |
+> | 10 | **El horario de atención**, cuántas personas atienden, wifi del local | El horario lo necesito para el cartel de abierto/cerrado |
+>
+> **Y una nueva, que salió de sus respuestas:** pedirle que **corrija los tres lomitos en
+> Loyverse**. Hoy cobra $900 de más por cada Lomito Chacarero y $300 de menos por cada Lomito
+> Ita/Luco.
+
+---
+
 27/10/2026. Para leer del teléfono mientras hablan. Ordenadas por cuánta plata mueven.
 
 Las de la **PARTE 1** salieron de cruzar la carta con Loyverse y son las que pueden costar plata

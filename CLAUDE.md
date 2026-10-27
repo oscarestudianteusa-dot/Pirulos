@@ -244,11 +244,11 @@ Confirmar con Miguel antes o durante la Fase 0:
 - [x] ~~¿El Bluetooth de la impresora es SPP clásico o BLE?~~ → **SPP**, por Web Serial. Es el camino bueno.
 - [ ] ¿Hay WiFi estable en el local?
 - [ ] ¿Cuántos productos tiene la carta? ¿Hay variantes (tamaños, combos)?
-- [ ] ¿Qué modificaciones pide la gente realmente? (sin tomate, extra queso, etc.)
+- [~] **¿Qué modificaciones pide la gente?** — **mitad resuelto.** Lo que se AGREGA salió de la categoría `Extras` de Loyverse, con precio: palta, queso, champiñón y tocino $1.000, cheddar laminado $1.000, cheddar líquido $1.500, extra carne $1.700, doble hamburguesa $1.800, vienesa vegana $800. Falta lo que se QUITA (sin tomate, sin mayo), que no existe en Loyverse porque nunca se cobró. Ver `data/CONTRASTE-LOYVERSE.md`.
 - [ ] ¿Cuántas personas atienden? ¿Necesita usuarios separados o basta con uno?
 - [ ] **¿Miguel emite boleta electrónica?** ¿Con qué sistema? Esto puede ser bloqueante para retirar Loyverse.
 - [ ] ¿Miguel tiene los costos de sus insumos, o hay que levantarlos desde cero?
-- [ ] ¿El local tiene número de WhatsApp Business o WhatsApp normal?
+- [x] ~~¿El local tiene WhatsApp Business o normal?~~ → **Business.** Confirmado por Miguel, 27/10/2026. El mensaje de bienvenida automático con el link es viable tal como estaba planeado.
 - [ ] ¿Horario de atención? (para mostrar "cerrado" en la carta)
 - [ ] ¿Hay dominio comprado? ¿Quién paga hosting?
 - [ ] Volumen aproximado de pedidos al día.

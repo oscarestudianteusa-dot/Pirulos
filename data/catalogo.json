@@ -7,7 +7,9 @@
     "regla_de_precio": "Si la carta no especifica otro precio, el precio es el mismo. Confirmado por Pipo.",
     "sandwich_as_vienesas": "El precio NO cambia segun la proteina (churrasco / lomito / pollo / hamburguesa). La proteina se modela como modificador obligatorio sin costo en la etapa de modificadores, y DEBE salir impresa en la comanda.",
     "catalogo_completo": "Pipo confirma que las 11 fotos cubren la carta entera: no faltan paginas ni secciones.",
-    "bebidas": "OBLIGATORIO: la carta debe tener una seccion para elegir sabor de bebida. Miguel maneja varios sabores, TODOS AL MISMO PRECIO. La lista concreta de sabores esta pendiente de Miguel (ver DUDAS.md), por eso todavia no hay modificadores en este archivo.",
+    "bebidas": "OBLIGATORIO: la carta debe tener una seccion para elegir sabor de bebida. Miguel maneja varios sabores, TODOS AL MISMO PRECIO. Confirmado 27/10/2026: los sabores NO son una lista fija, dependen de lo que haya en bodega ese dia ('estan en inventario'). No se hardcodean: la carta lleva una lista de sabores que Miguel marca disponible/no disponible, usando el flag 'disponible' que el modelo de datos ya tiene. Las bebidas GRANDES (1,5 lt y 3 lt) son de la linea CCU, NO Coca-Cola: no nombrar marcas de la competencia en la carta. El agua va con gas o sin gas, como eleccion obligatoria sin costo.",
+    "proteina_precio": "VERIFICADO contra Loyverse el 27/10/2026 y confirmado por Miguel: el precio NO cambia segun la proteina. Loyverse tiene tres lomitos con precio distinto (Italiano 5000, Chacarero 5700, Ita/Luco 4700) y Miguel confirmo que son ERRORES DE CARGA en Loyverse, no precios reales. Valen lo mismo que las demas proteinas. La proteina sigue siendo modificador obligatorio SIN costo.",
+    "chemilico": "Confirmado por Miguel 27/10/2026: el Chemilico se puede pedir en TODAS las proteinas, no solo churrasco. Por eso se le saco 'Churrasco' a la descripcion.",
     "estructura": "8 categorias definidas por Pipo. Las 6 secciones de papas de la carta fisica (Papas Fritas, Gringa, Chorrillana, Salchipapas, Suprema, Suprema Italiana) se agruparon en 'Papas Fritas'. Las 4 secciones de picoteo (Empanaditas Medialuna, Empanaditas Triangular, Arrollados, Picoteo) se agruparon en 'Picoteo'. Los productos se llaman por su sabor a secas ('Mechada Queso'); el formato y la cantidad van en la descripcion ('Empanadita triangular - 5 unidades') y bajan a la comanda impresa."
   },
   "categorias": [
@@ -81,7 +83,7 @@
     { "id": "sandwich-chacarero-2-0", "categoria_id": "sandwich", "nombre": "Chacarero 2.0", "descripcion": "Tomate - porotos verdes - ají verde - queso - champiñón - mayo", "precio": 5700, "orden": 18 },
     { "id": "sandwich-paltapeno", "categoria_id": "sandwich", "nombre": "Paltapeño", "descripcion": "Tomate - palta - lechuga - cebolla morada - jalapeño - mayo", "precio": 5500, "orden": 19 },
     { "id": "sandwich-pirulastico", "categoria_id": "sandwich", "nombre": "Pirulastico", "descripcion": "Cheddar - tocino - tomate - lechuga - cebolla morada - mayo", "precio": 5700, "orden": 20 },
-    { "id": "sandwich-chemilico", "categoria_id": "sandwich", "nombre": "Chemilico", "descripcion": "Churrasco - cebolla caramelizada - huevo frito", "precio": 4900, "orden": 21 },
+    { "id": "sandwich-chemilico", "categoria_id": "sandwich", "nombre": "Chemilico", "descripcion": "Cebolla caramelizada - huevo frito", "precio": 4900, "orden": 21 },
 
     { "id": "hamburguesa-cheese-burguer", "categoria_id": "hamburguesas", "nombre": "Cheese Burguer", "descripcion": "2 hamburguesas 100g - cheddar - tocino - aros de cebolla - barbecue - baño de cheddar", "precio": 6500, "orden": 1 },
     { "id": "hamburguesa-tapa-arterias", "categoria_id": "hamburguesas", "nombre": "Tapa Arterias", "descripcion": "3 hamburguesas 100g - doble tocino - cheddar - mayo - cebolla caramelizada - huevo frito", "precio": 7500, "orden": 2 },
@@ -89,14 +91,14 @@
     { "id": "papas-fritas-chica", "categoria_id": "papas-fritas", "nombre": "Papas Fritas Chica", "descripcion": "", "precio": 2000, "orden": 1 },
     { "id": "papas-fritas-mediana", "categoria_id": "papas-fritas", "nombre": "Papas Fritas Mediana", "descripcion": "", "precio": 3000, "orden": 2 },
     { "id": "papas-fritas-grande", "categoria_id": "papas-fritas", "nombre": "Papas Fritas Grande", "descripcion": "", "precio": 5000, "orden": 3 },
-    { "id": "gringa-mediana", "categoria_id": "papas-fritas", "nombre": "Gringa Mediana", "descripcion": "", "precio": 5500, "orden": 4 },
-    { "id": "gringa-grande", "categoria_id": "papas-fritas", "nombre": "Gringa Grande", "descripcion": "", "precio": 7500, "orden": 5 },
+    { "id": "gringa-mediana", "categoria_id": "papas-fritas", "nombre": "Gringa Mediana", "descripcion": "Cheddar - tocino - barbecue", "precio": 5500, "orden": 4 },
+    { "id": "gringa-grande", "categoria_id": "papas-fritas", "nombre": "Gringa Grande", "descripcion": "Cheddar - tocino - barbecue", "precio": 7500, "orden": 5 },
     { "id": "salchipapas-mediana", "categoria_id": "papas-fritas", "nombre": "Salchipapas Mediana", "descripcion": "", "precio": 3500, "orden": 6 },
     { "id": "salchipapas-grande", "categoria_id": "papas-fritas", "nombre": "Salchipapas Grande", "descripcion": "", "precio": 6000, "orden": 7 },
-    { "id": "suprema-mediana", "categoria_id": "papas-fritas", "nombre": "Suprema Mediana", "descripcion": "", "precio": 6000, "orden": 8 },
-    { "id": "suprema-grande", "categoria_id": "papas-fritas", "nombre": "Suprema Grande", "descripcion": "", "precio": 8000, "orden": 9 },
-    { "id": "suprema-italiana-mediana", "categoria_id": "papas-fritas", "nombre": "Suprema Italiana Mediana", "descripcion": "", "precio": 6000, "orden": 10 },
-    { "id": "suprema-italiana-grande", "categoria_id": "papas-fritas", "nombre": "Suprema Italiana Grande", "descripcion": "", "precio": 8000, "orden": 11 },
+    { "id": "suprema-mediana", "categoria_id": "papas-fritas", "nombre": "Suprema Mediana", "descripcion": "Cheddar - tomate - carne - cebollín", "precio": 6000, "orden": 8 },
+    { "id": "suprema-grande", "categoria_id": "papas-fritas", "nombre": "Suprema Grande", "descripcion": "Cheddar - tomate - carne - cebollín", "precio": 8000, "orden": 9 },
+    { "id": "suprema-italiana-mediana", "categoria_id": "papas-fritas", "nombre": "Suprema Italiana Mediana", "descripcion": "Tomate - palta - mayo - carne", "precio": 6000, "orden": 10 },
+    { "id": "suprema-italiana-grande", "categoria_id": "papas-fritas", "nombre": "Suprema Italiana Grande", "descripcion": "Tomate - palta - mayo - carne", "precio": 8000, "orden": 11 },
     { "id": "chorrillana-grande", "categoria_id": "papas-fritas", "nombre": "Chorrillana Grande", "descripcion": "", "precio": 15000, "orden": 12 },
 
     { "id": "empanadita-medialuna-queso", "categoria_id": "picoteo", "nombre": "Queso", "descripcion": "Empanadita medialuna · 5 unidades", "precio": 3000, "orden": 1 },
@@ -115,7 +117,7 @@
     { "id": "bebida-lata-350", "categoria_id": "bebidas", "nombre": "Lata 350cc", "descripcion": "", "precio": 1300, "orden": 3 },
     { "id": "bebida-jugo-individual", "categoria_id": "bebidas", "nombre": "Jugo Individual", "descripcion": "", "precio": 1300, "orden": 4 },
     { "id": "bebida-monster", "categoria_id": "bebidas", "nombre": "Monster", "descripcion": "", "precio": 2000, "orden": 5 },
-    { "id": "bebida-agua-individual", "categoria_id": "bebidas", "nombre": "Agua Individual", "descripcion": "", "precio": 800, "orden": 6 },
+    { "id": "bebida-agua-individual", "categoria_id": "bebidas", "nombre": "Agua Individual", "descripcion": "Con gas o sin gas", "precio": 800, "orden": 6 },
     { "id": "bebida-desechable-1500", "categoria_id": "bebidas", "nombre": "Desechable 1,5 lt", "descripcion": "", "precio": 2500, "orden": 7 },
     { "id": "bebida-desechable-3000", "categoria_id": "bebidas", "nombre": "Desechable 3 lt", "descripcion": "", "precio": 3500, "orden": 8 }
   ]
