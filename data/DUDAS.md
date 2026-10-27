@@ -39,7 +39,22 @@ No es solo de churrasco. Se le quitó "Churrasco" a la descripción, que ahora d
 ### ✅ A-11 · El agua
 **Hay con gas y sin gas.** Queda como elección obligatoria sin costo, igual que la proteína.
 
-### ✅ A-1 · Los sabores de bebida — resuelto, pero no como esperábamos
+### ✅ A-1 · Los sabores de bebida — **la carta no los pide** (decisión de Pipo, 27/10/2026)
+
+**El cliente pide "Bebida Lata" o "Desechable 1,5 lt" a secas, y elige el sabor en el local.**
+
+El razonamiento, que vale guardarlo: los sabores dependen de lo que haya en el refrigerador ese
+día. Si el cliente elige "Bilz" en la web y no queda, alguien tiene que llamarlo o improvisar —
+una fricción garantizada, y encima en el peor momento. Dejando la elección para el mostrador, la
+decisión ocurre **donde está la información real**.
+
+→ Esto **anula** el requisito de armar una sección de sabores, y saca un bloqueante de la Fase 1.
+→ El agua sí lleva elección **con gas / sin gas**, porque eso no se agota por sabor.
+→ Las grandes son CCU: no se nombran marcas en la carta.
+
+*Lo de abajo queda como registro de cómo se llegó acá.*
+
+### ~~A-1 · Los sabores de bebida — primera lectura~~
 Miguel dice que **"están en inventario"**. Lo verifiqué en Loyverse: no hay ni un sabor cargado,
 ni variantes, ni seguimiento de inventario activo. O sea que se refiere a la **bodega física**:
 los sabores son los que haya ese día.
