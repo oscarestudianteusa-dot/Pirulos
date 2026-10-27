@@ -31,6 +31,51 @@ mkdir -p "data/loyverse"
 
 ---
 
+## Cómo entrar al Back Office
+
+**Con la tablet no alcanza.** La app del POS no exporta nada: los exports existen solo en el Back
+Office web, y eso pide el correo y la contraseña de la cuenta de Loyverse, que es de Miguel.
+
+Tres caminos, de mejor a peor:
+
+**A · Que Miguel entre él.** Lo más simple y gratis. Se sienta un rato con el computador, entra a
+https://loyverse.com/back-office, y hacen los cuatro exports juntos — son diez minutos. O los hace
+él y te pasa los archivos. Sin contraseñas de por medio y sin instalar nada.
+
+**B · Que Miguel te cree un usuario propio.** Es lo más prolijo: tenés tu propio acceso, con
+permisos acotados, y él lo puede revocar cuando quiera. **Pero la gestión de empleados en Loyverse
+es un add-on de pago**, con prueba gratis.
+
+→ *Vale la pena revisar si ya lo tienen activo*: **Ajustes → Facturación y suscripciones**. Si la
+cuenta ya paga ese add-on, esta es la opción buena. Si no, no lo contraten solo para esto: la A
+hace lo mismo gratis.
+
+Si lo activan: *Empleados → Lista de empleados → Añadir empleado*, con un rol que tenga
+**«Acceso al Back Office»** y, dentro, **«Ver informes de ventas»** y **«Gestionar artículos»**.
+Con eso me sobra, y Miguel no te da acceso a facturación ni a datos de clientes.
+
+**C · Que te pase sus credenciales.** Funciona, pero le da acceso a todo: configuración,
+facturación y los datos de sus clientes. Es decisión de él, no la recomiendo si la A es posible.
+
+> **A mí no me mandes las credenciales.** No las necesito y no las quiero. Lo único que necesito
+> son los CSV.
+
+*Para saber de qué cuenta se trata: en la app de Loyverse de la tablet, el correo de la cuenta
+aparece en el menú lateral. Eso le dice a Miguel cuál es, aunque no sirva para entrar.*
+
+### Si conseguir el acceso se demora, esto no frena nada
+
+Lo único que bloquea la carta son **los modificadores**, y eso **Miguel lo puede contestar
+hablando**, en cinco minutos y sin entrar a ningún lado:
+
+> *¿Qué cosas te piden que les saques o les agregues? ¿Cuáles cobras aparte y cuánto?*
+
+Con esa respuesta arranco igual. El export de modificadores no es imprescindible: es mejor, porque
+trae **cuántas veces pidieron cada uno** y con eso la carta los puede ordenar por uso real en vez
+de por lo que uno se acuerde. Pero es una mejora, no un requisito.
+
+---
+
 # Los cuatro exports, en orden de importancia
 
 Todo se hace desde el **Back Office**: https://loyverse.com/back-office (en el computador, no en
