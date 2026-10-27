@@ -14,6 +14,14 @@ dist/
 .env.local
 .env*.local
 
+# Datos exportados de Loyverse — NUNCA subir
+# Este repositorio es PÚBLICO (GitHub Pages sirve la carta desde /docs).
+# Los exports traen las ventas completas del local: cuánto factura Miguel,
+# a qué hora, qué día. Eso no es dato de la carta, es información del
+# negocio de otra persona y no tiene por qué estar al alcance de cualquiera.
+# Se trabajan en local y se quedan en local.
+data/loyverse/
+
 # Sistema
 .DS_Store
 Thumbs.db

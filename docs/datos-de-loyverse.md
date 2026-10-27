@@ -1,45 +1,95 @@
-# Qué sacarle a Loyverse antes de retirarlo
+# Qué sacarle a Loyverse — paso a paso
 
-Fecha: 27/10/2026. Pregunta de Pipo: *¿querés algún dato de Loyverse para lo que viene?*
-Sí, cuatro cosas. Tres son gratis y sirven ya; la cuarta cuesta y es una decisión tuya.
-
-**Lo que no quiero: datos de clientes.** Nombres, teléfonos, correos. No los necesitamos para
-nada, son datos personales de gente que no pidió estar en nuestro sistema, y no tenerlos es la
-forma más simple de no tener que cuidarlos.
+Fecha: 27/10/2026. La cuenta de Pirulo's es **de pago**, así que los exports están disponibles y
+el histórico completo también. Eso cambia bastante: se puede sacar todo de una vez.
 
 ---
 
-## El límite que manda sobre todo esto
+## ⚠️ Antes de bajar nada: dónde van estos archivos
 
-En el **plan gratis** de Loyverse:
+**Este repositorio es público.** GitHub Pages sirve la carta desde `/docs`, y cualquiera puede ver
+lo que haya acá. Los exports de ventas dicen cuánto factura Miguel, a qué hora y qué día. Eso no
+es información de la carta: es el negocio de otra persona.
 
-- Los reportes de ventas muestran solo los **últimos 31 días**.
-- **Exportar reportes de ventas no está disponible.** Se pueden mirar en pantalla, no descargar.
+Ya agregué `data/loyverse/` al `.gitignore`. **Los archivos van ahí y se quedan en el computador.**
+Yo los leo en local sin problema; no necesitan estar en GitHub para que yo trabaje con ellos.
 
-Para ver más atrás y poder exportar hace falta el add-on **Unlimited Sales History**
-(≈ USD 5–7 al mes por local, con prueba gratis). Esto no lo decido yo.
+Creá la carpeta antes de empezar:
+
+```bash
+mkdir -p "data/loyverse"
+```
+
+**Dos reglas al bajarlos:**
+
+1. **No los abras en Excel y los vuelvas a guardar.** Excel rompe los acentos de los CSV en UTF-8
+   y a veces convierte números en fechas. Bajalos y dejalos tal cual. Si querés mirarlos, abrilos
+   en Google Sheets, que no los toca.
+2. **El export de clientes no lo quiero.** Nombres, teléfonos y correos de gente que no pidió estar
+   en nuestro sistema. No lo necesitamos para nada, y no tenerlo es la forma más simple de no tener
+   que cuidarlo.
 
 ---
 
-## 1. 🟢 Modificadores — **lo que más me sirve hoy**
+# Los cuatro exports, en orden de importancia
 
-**Back office → Artículos → Modificadores.**
+Todo se hace desde el **Back Office**: https://loyverse.com/back-office (en el computador, no en
+la app del teléfono).
 
-En la carta de papel no están escritos, y es un PENDIENTE abierto desde el principio
-(`DUDAS.md`, A-15): *qué modificaciones pide la gente de verdad y cuáles tienen costo extra.*
+**Filtros comunes a todos los reportes.** Donde diga de elegir período y filtros, poné siempre:
 
-Si Miguel los configuró en Loyverse, ahí está la respuesta **salida del uso real**, no de lo que
-alguien se acuerde. Y de paso el precio de cada uno, que es el dato que me falta para que el
-carrito sume bien.
+- **Fechas**: desde el **primer día de actividad** del local hasta **hoy**
+- **Todo el día** (no una franja horaria)
+- **Todas las tiendas**
+- **Todos los empleados**
 
-Mandame una captura de la lista, o escribila a mano si son pocos.
+---
 
-## 2. 🟢 Lista de artículos con precios — **para contrastar**
+## 1 · Ventas por modificador 🔴 — *el que desbloquea la carta*
 
-**Back office → Artículos → Lista de artículos.** Esta sí se puede exportar en el plan gratis
-(es el catálogo, no un reporte de ventas).
+**Reportes → Ventas por modificador** → período y filtros de arriba → **Exportar**
 
-Para qué: contrastar contra `data/catalogo.json`, que salió de las fotos de la carta.
+Guardar como: `data/loyverse/ventas-por-modificador.csv`
+
+**Por qué este primero.** Es el único dato de Loyverse que hoy frena la Fase 1. En la carta de
+papel los modificadores no están escritos, y es un PENDIENTE abierto desde el principio
+(`DUDAS.md`, A-15): *qué pide la gente de verdad y cuáles tienen costo extra.*
+
+Este reporte no me dice solo cuáles existen: me dice **cuántas veces los pidieron**. O sea que
+puedo ordenar la carta poniendo arriba los que la gente realmente usa, en vez de una lista larga
+donde hay que buscar. Eso sale de datos de uso real, no de la memoria de nadie.
+
+**Además, sacá una captura de pantalla de Artículos → Modificadores.** El reporte dice qué se
+vendió; la pantalla de configuración dice **cuánto cuesta cada uno** y a qué productos aplica, que
+es lo que necesito para que el carrito sume bien.
+
+## 2 · Recibos por artículo 🔴 — *el más rico de todos*
+
+**Reportes → Recibos** → período y filtros de arriba → **Exportar** → elegir **«Recibos por
+artículo»** (no «Recibos» a secas)
+
+Guardar como: `data/loyverse/recibos-por-articulo.csv`
+
+**Ojo con la opción.** «Recibos» da una línea por boleta; **«Recibos por artículo» da una línea por
+producto vendido**, con precio, descuentos e impuestos. Esa es la que quiero.
+
+**Por qué es el mejor.** Es el dato crudo: cada línea de cada boleta con su hora. De ahí sale todo
+lo demás sin tener que pedírtelo por separado — qué se vende más, a qué horas, qué días, el ticket
+promedio, y **qué se pide junto con qué** (si el 70% de los churrascos se lleva papas, eso es una
+promo que se arma sola).
+
+Es la mitad de la matriz de menu engineering de la Fase 4. La otra mitad son los costos, que
+Loyverse no tiene y hay que levantar con Miguel.
+
+Si el archivo sale muy grande, bajalo por año y nombralos `recibos-por-articulo-2025.csv`, etc.
+
+## 3 · Lista de artículos 🟠 — *para proteger los precios*
+
+**Artículos → Lista de artículos** → botón **Exportar**
+
+Guardar como: `data/loyverse/articulos.csv`
+
+**Por qué.** Para contrastar contra `data/catalogo.json`, que salió de las fotos de la carta.
 
 Dos razones concretas:
 
@@ -48,62 +98,46 @@ Dos razones concretas:
 - Un error de transcripción mío entre 90 productos es perfectamente posible. Dos fuentes
   independientes lo cazan; una sola, no.
 
-*(En `DUDAS.md` quedó anotado que no hacía falta contrastar. Eso fue antes de que pasaran dos
-meses y medio, y antes de que el contraste fuera gratis.)*
+*(En `DUDAS.md` quedó anotado que no hacía falta contrastar contra Loyverse. Eso fue antes de que
+pasaran dos meses y medio.)*
 
-## 3. 🟢 Ventas de los últimos 31 días — **mirar, aunque no se pueda exportar**
+## 4 · Resumen de ventas 🟡 — *volumen y horarios*
 
-**Back office → Reportes → Ventas por artículo**, y **Reportes → Resumen de ventas**.
+**Reportes → Resumen de ventas** → período y filtros de arriba → **Exportar**
 
-Aunque no se descarguen, en pantalla responden tres cosas que hoy son preguntas abiertas:
+Guardar como: `data/loyverse/resumen-de-ventas.csv`
 
-| Qué miro | Qué PENDIENTE cierra |
-|---|---|
-| Recibos por día | *Volumen aproximado de pedidos al día* |
-| A qué hora se concentran | *Horario de atención*, y las horas muertas de la Fase 4 |
-| Qué productos encabezan la lista | Los primeros datos de popularidad reales |
+Cierra dos PENDIENTES del `CLAUDE.md` con datos en vez de estimaciones: **cuántos pedidos al día**
+y **en qué horario trabaja el local de verdad** (que puede no ser el horario que está publicado).
 
-Con capturas de esas dos pantallas me alcanza. **El orden de los productos más vendidos es el dato
-jugoso**: es la mitad de la matriz de menu engineering de la Fase 4 — la otra mitad son los costos,
-que Loyverse no tiene.
-
-## 4. 🟡 El historial completo — cuesta, y lo decidís vos
-
-**Add-on Unlimited Sales History**, ≈ USD 5–7 al mes, con prueba gratis. Permite ver y **exportar**
-todo el histórico.
-
-**A favor de hacerlo, y hacerlo ahora:**
-
-- La Fase 4 es el diferencial del proyecto: lo que Loyverse no hace. Con histórico puede dar
-  recomendaciones **el primer día**. Sin histórico, hay que esperar meses a juntar datos propios.
-- Nadie documenta cuánto tiempo guarda Loyverse los datos que no te deja ver. Si algún día esa
-  cuenta se cierra o caduca, el histórico se va con ella y no hay vuelta atrás.
-- A mí me sirve para diseñar: ver cómo son los datos de ventas reales es distinto a imaginarlos.
-  El modelo de las Fases 3 y 4 sale mejor mirando datos que suponiendo.
-
-**En contra:**
-
-- Las Fases 2 en adelante son condicionales a que haya tiempo. Puede que nunca lleguemos ahí.
-- Cuanto más tarde se exporte, más datos trae. Si la prueba gratis se usa una sola vez, usarla
-  ahora significa no tener los meses que vienen.
-
-**Mi recomendación: hacerlo igual, y ahora.** El argumento que me convence no es la Fase 4, es que
-el dato puede desaparecer. Los meses que vienen los vamos a tener en **nuestra** base de datos de
-todas formas, una vez que la Fase 1 esté andando. Lo que no vamos a poder recuperar nunca es lo que
-ya pasó.
-
-Si lo hacés: en el selector de fechas elegir desde el **primer día de actividad** hasta hoy, con
-*todos los días*, *todas las tiendas* y *todos los empleados*, y exportar. El archivo va a
-`data/loyverse/` — y ojo, ese export **no** debe traer datos de clientes.
+El horario lo necesito para el indicador de abierto/cerrado de la carta. Si alguien entra a las
+3 de la mañana, tiene que ver "cerrado" y no poder mandar un pedido que nadie va a leer.
 
 ---
 
-## Orden sugerido
+# Opcional, para más adelante
 
-1. Los modificadores (10 minutos, y desbloquea la carta).
-2. Las capturas de los dos reportes (5 minutos, cierra dos PENDIENTES).
-3. El export de artículos (5 minutos, protege los precios).
-4. Pensar lo del add-on sin apuro.
+**Ventas por tipo de pago** — *Reportes → Ventas por tipo de pago* → `tipos-de-pago.csv`
 
-Nada de esto bloquea que yo empiece a construir. Lo único que de verdad frena la carta son los
-modificadores, y eso también lo puede contestar Miguel de memoria.
+No lo necesito ahora, pero cuando llegue la Fase 2 (arqueo de caja) me dice qué proporción es
+efectivo y qué proporción tarjeta. Si ya estás ahí, bajalo de paso: son dos clics.
+
+**Ventas por categoría** — se deduce de los recibos, no hace falta.
+
+---
+
+# Resumen para llevar
+
+| # | Dónde | Qué elegir | Archivo |
+|---|---|---|---|
+| 1 | Reportes → Ventas por modificador | Exportar | `ventas-por-modificador.csv` |
+| 1b | Artículos → Modificadores | *captura de pantalla* | — |
+| 2 | Reportes → Recibos | Exportar → **Recibos por artículo** | `recibos-por-articulo.csv` |
+| 3 | Artículos → Lista de artículos | Exportar | `articulos.csv` |
+| 4 | Reportes → Resumen de ventas | Exportar | `resumen-de-ventas.csv` |
+
+Todos en `data/loyverse/`, todos con el rango completo de actividad, ninguno abierto y reguardado
+en Excel. Cuando estén, avisame y los leo.
+
+**Si solo tenés tiempo para uno**, que sea el **1**: es el único que bloquea la carta. El 2 es el
+más valioso a largo plazo, pero puede esperar.
